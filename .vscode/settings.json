@@ -1,0 +1,10 @@
+{
+  "java.project.referencedLibraries": [
+    "lib/**/*.jar",
+    "c:\\Users\\Eva Marlini\\Downloads\\mysql-connector-j-9.6.0.jar",
+    "c:\\Users\\Eva Marlini\\Downloads\\core-3.5.1-javadoc.jar",
+    "c:\\Users\\Eva Marlini\\Downloads\\javase-3.5.1-javadoc.jar",
+    "c:\\Users\\Eva Marlini\\Downloads\\core-3.5.1.jar",
+    "c:\\Users\\Eva Marlini\\Downloads\\javase-3.5.1.jar"
+  ]
+}
