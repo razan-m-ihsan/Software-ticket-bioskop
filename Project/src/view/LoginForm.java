@@ -134,22 +134,33 @@ public class LoginForm extends JFrame {
 
     // ===== LOGIN =====
     private void loginAction() {
-        String email = txtEmail.getText();
-        String password = new String(txtPassword.getPassword());
+    String email = txtEmail.getText().trim();
+    String password = new String(txtPassword.getPassword()).trim();
 
-        UserDAO dao = new UserDAO();
-        User user = dao.login(email, password);
+    // 🔥 DEBUG (LIHAT INPUT ASLI)
+    System.out.println("Email input: [" + email + "]");
+    System.out.println("Password input: [" + password + "]");
 
-        if (user != null) {
-            JOptionPane.showMessageDialog(this, "Login berhasil sebagai " + user.getRole());
+    // 🔥 VALIDASI (FIX PLACEHOLDER)
+    if (email.equals("Email") || password.equals("Password") 
+            || email.isEmpty() || password.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Isi email dan password dulu!");
+        return;
+    }
 
-            dispose();
+    UserDAO dao = new UserDAO();
+    User user = dao.login(email, password);
 
-            if (user.getRole().equalsIgnoreCase("Admin")) {
-                new AdminDashboard().setVisible(true);
-            } else {
-                new UserDashboard(user.getId()).setVisible(true);
-            }
+    if (user != null) {
+        JOptionPane.showMessageDialog(this, "Login berhasil sebagai " + user.getRole());
+
+        dispose();
+
+        if (user.getRole().equalsIgnoreCase("Admin")) {
+            new AdminDashboard().setVisible(true);
+        } else {
+            new UserDashboard(user.getId()).setVisible(true);
+        }
 
         } else {
             JOptionPane.showMessageDialog(this, "Login gagal!");
