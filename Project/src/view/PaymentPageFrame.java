@@ -419,7 +419,7 @@ public class PaymentPageFrame extends JFrame {
                 logoPanel.add(createLogo("/assets/gopay.png", 30, 30));
                 logoPanel.add(createLogo("/assets/ovo.png", 30, 30));
             } else if (type.equals("card")) {
-                logoPanel.add(createLogo("/assets/visa&mastercard.png", 90, 50));
+                logoPanel.add(createLogo("/assets/visa_mastercard.png", 90, 50));
             } else if (type.equals("bank")) {
                 logoPanel.add(createLogo("/assets/bank.png", 40, 40));
             }
