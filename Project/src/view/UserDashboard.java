@@ -1,15 +1,14 @@
 package view;
 
 import config.DatabaseConnection;
-
-import javax.swing.*;
-import javax.swing.border.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.net.URL;
 import java.sql.*;
 import java.util.*;
 import java.util.List;
+import javax.swing.*;
+import javax.swing.border.*;
 
 public class UserDashboard extends JFrame {
 
@@ -35,6 +34,7 @@ public class UserDashboard extends JFrame {
     // ── State ──────────────────────────────────────────────────────────────────
     private String       selectedStudioName = "";
     private String       selectedTime       = "";
+    private String       selectedCinema     = "Cinepolis - Palembang Icon";
     private List<String> selectedSeats      = new ArrayList<>();
     private long         foodTotal          = 0;
     private String       foodSummary        = "";   // e.g. "Popcorn Caramel Large x2, ..."
@@ -120,12 +120,14 @@ public class UserDashboard extends JFrame {
         JLabel pin = new JLabel("📍");
         pin.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 16));
 
-        String[] cinemas = {"Cinepolis – Palembang Icon", "CGV Palembang", "XXI Palembang"};
+        String[] cinemas = {"Cinepolis - Palembang Icon", "CGV Palembang", "XXI Palembang"};
         JComboBox<String> cbCinema = new JComboBox<>(cinemas);
         cbCinema.setBackground(new Color(52, 52, 52));
         cbCinema.setForeground(Color.WHITE);
         cbCinema.setFont(new Font("Segoe UI", Font.BOLD, 14));
         cbCinema.setBorder(null);
+        cbCinema.addActionListener(e -> selectedCinema = (String) cbCinema.getSelectedItem());
+        selectedCinema = (String) cbCinema.getSelectedItem();
 
         JLabel arrow = new JLabel("⌄");
         arrow.setForeground(Color.WHITE);
@@ -606,15 +608,29 @@ public class UserDashboard extends JFrame {
         if (selectedSeats.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Pilih kursi terlebih dahulu!", "Peringatan", JOptionPane.WARNING_MESSAGE); return;
         }
-        JOptionPane.showMessageDialog(this,
-                "Pembayaran berhasil! ✅\n"
-                + "Film    : " + txtJudul.getText()     + "\n"
-                + "Studio  : " + txtStudio.getText()    + "\n"
-                + "Jam     : " + txtJamTayang.getText() + "\n"
-                + "Kursi   : " + txtKursi.getText()     + "\n"
-                + "Makanan : " + (foodSummary.isEmpty() ? "-" : foodSummary) + "\n"
-                + "Total   : " + txtTotal.getText(),
-                "Konfirmasi Pembayaran", JOptionPane.INFORMATION_MESSAGE);
+
+        long seatTotal = (long) selectedSeats.size() * HARGA_INT;
+        long subtotal = seatTotal + foodTotal;
+        long promoValue = subtotal >= 665_000 ? 30_000 : 0;
+        long finalTotal = Math.max(0, subtotal - promoValue);
+
+        PaymentPageFrame paymentPage = new PaymentPageFrame(
+                userId,
+                selectedCinema,
+                buildMovieTitleList(),
+                new ArrayList<>(filmPosters),
+                filmList.getSelectedIndex(),
+                txtJudul.getText(),
+                txtStudio.getText(),
+                txtJamTayang.getText(),
+                new ArrayList<>(selectedSeats),
+                foodSummary,
+                subtotal,
+                promoValue,
+                finalTotal
+        );
+        paymentPage.setVisible(true);
+        dispose();
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -748,6 +764,14 @@ public class UserDashboard extends JFrame {
 
     private String formatRp(long amount) {
         return "Rp " + String.format("%,d", amount).replace(',', '.');
+    }
+
+    private List<String> buildMovieTitleList() {
+        List<String> titles = new ArrayList<>();
+        for (int i = 0; i < listModel.size(); i++) {
+            titles.add(listModel.get(i));
+        }
+        return titles;
     }
 
     private void loadPoster(int idx) {
