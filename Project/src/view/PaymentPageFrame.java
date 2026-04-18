@@ -87,7 +87,7 @@ public class PaymentPageFrame extends JFrame {
         cinemaLabel.setForeground(Color.WHITE);
         cinemaLabel.setFont(new Font("Krona One", Font.BOLD, 14));
 
-        JLabel arrow = new JLabel("⌄");
+        JLabel arrow = new JLabel("V");
         arrow.setForeground(Color.WHITE);
         arrow.setFont(new Font("Krona One", Font.BOLD, 18));
 
@@ -182,6 +182,12 @@ public class PaymentPageFrame extends JFrame {
         return panel;
     }
 
+    private JLabel createLogo(String path, int w, int h) {
+        ImageIcon icon = new ImageIcon(getClass().getResource(path));
+        Image img = icon.getImage().getScaledInstance(w, h, Image.SCALE_SMOOTH);
+        return new JLabel(new ImageIcon(img));
+    }
+
     private JPanel buildPaymentPanel(
             int userId,
             String filmTitle,
@@ -221,9 +227,11 @@ public class PaymentPageFrame extends JFrame {
         methodRow.setOpaque(false);
         methodRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 120));
 
-        JPanel wallet = createMethodCard("E-Wallet", "DANA   GOPAY   OVO");
-        JPanel card = createMethodCard("Kartu debit/Credit", "VISA   MASTERCARD");
-        JPanel bank = createMethodCard("Transfer Bank", "BANK");
+        
+
+        JPanel wallet = createMethodCard("E-Wallet", "ewallet");
+        JPanel card = createMethodCard("Kartu debit/Credit", "card");
+        JPanel bank = createMethodCard("Transfer Bank", "bank");
         wallet.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(255, 220, 80), 3),
                 new EmptyBorder(8, 8, 10, 8)));
@@ -390,46 +398,59 @@ public class PaymentPageFrame extends JFrame {
         return lbl;
     }
 
-    private JPanel createMethodCard(String title, String logosText) {
-        JPanel card = new JPanel(new BorderLayout(0, 8));
-        card.setBackground(new Color(64, 10, 10));
-        card.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createDashedBorder(new Color(210, 165, 0), 1.4f, 3f),
-                new EmptyBorder(8, 8, 10, 8)));
-        card.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    private JPanel createMethodCard(String title, String type) {
+            JPanel card = new JPanel(new BorderLayout(0, 8));
+            card.setBackground(new Color(64, 10, 10));
+            card.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createDashedBorder(new Color(210, 165, 0), 1.4f, 3f),
+                    new EmptyBorder(8, 8, 10, 8)
+            ));
+            card.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        JLabel lblTitle = new JLabel(title, SwingConstants.CENTER);
-        lblTitle.setForeground(Color.WHITE);
-        lblTitle.setFont(new Font("Krona One", Font.BOLD, 14));
+            JLabel lblTitle = new JLabel(title, SwingConstants.CENTER);
+            lblTitle.setForeground(Color.WHITE);
+            lblTitle.setFont(new Font("Krona One", Font.BOLD, 14));
 
-        JLabel logo = new JLabel(logosText, SwingConstants.CENTER);
-        logo.setForeground(new Color(255, 200, 0));
-        logo.setFont(new Font("Krona One", Font.BOLD, 13));
+            JPanel logoPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 5));
+            logoPanel.setOpaque(false);
 
-        card.add(lblTitle, BorderLayout.NORTH);
-        card.add(logo, BorderLayout.CENTER);
+            if (type.equals("ewallet")) {
+                logoPanel.add(createLogo("/assets/dana.png", 30, 30));
+                logoPanel.add(createLogo("/assets/gopay.png", 30, 30));
+                logoPanel.add(createLogo("/assets/ovo.png", 30, 30));
+            } else if (type.equals("card")) {
+                logoPanel.add(createLogo("/assets/visa&mastercard.png", 90, 50));
+            } else if (type.equals("bank")) {
+                logoPanel.add(createLogo("/assets/bank.png", 40, 40));
+            }
 
-        card.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                selectedMethod = title;
-                Component parent = card.getParent();
-                if (parent instanceof JPanel) {
-                    for (Component comp : ((JPanel) parent).getComponents()) {
-                        if (comp instanceof JPanel) {
-                            ((JPanel) comp).setBorder(BorderFactory.createCompoundBorder(
-                                    BorderFactory.createDashedBorder(new Color(210, 165, 0), 1.4f, 3f),
-                                    new EmptyBorder(8, 8, 10, 8)));
+            card.add(lblTitle, BorderLayout.NORTH);
+            card.add(logoPanel, BorderLayout.CENTER);
+            card.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    selectedMethod = title;
+
+                    Component parent = card.getParent();
+                    if (parent instanceof JPanel) {
+                        for (Component comp : ((JPanel) parent).getComponents()) {
+                            if (comp instanceof JPanel) {
+                                ((JPanel) comp).setBorder(BorderFactory.createCompoundBorder(
+                                        BorderFactory.createDashedBorder(new Color(210, 165, 0), 1.4f, 3f),
+                                        new EmptyBorder(8, 8, 10, 8)
+                                ));
+                            }
                         }
                     }
-                }
-                card.setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(new Color(255, 220, 80), 3),
-                        new EmptyBorder(8, 8, 10, 8)));
-            }
-        });
 
-        return card;
+                    card.setBorder(BorderFactory.createCompoundBorder(
+                            BorderFactory.createLineBorder(new Color(255, 220, 80), 3),
+                            new EmptyBorder(8, 8, 10, 8)
+                    ));
+                }
+            });
+
+            return card;
     }
 
     private void loadPoster(int idx) {
