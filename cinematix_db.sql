@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 13, 2026 at 09:15 AM
+-- Generation Time: Apr 23, 2026 at 06:44 AM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- PHP Version: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -41,8 +41,35 @@ CREATE TABLE `movies` (
 --
 
 INSERT INTO `movies` (`id`, `judul`, `sinopsis`, `durasi`, `genre`, `rating_usia`) VALUES
-(2, 'Avengers', 'Superhero Marvel', 120, 'Action', '13+'),
-(6, 'El Camino: A Breaking Bad Movie', 'After a dramatic escape from captivity, Jesse Pinkman must deal with his past in order to make some kind of future for himself.', 122, 'Thriller', '13+');
+(2, 'Avengers', '', 123, 'Action', '13+'),
+(6, 'El Camino: A Breaking Bad Movie', '', 122, 'Thriller', '13+'),
+(7, 'AMBALANGKUNG THE MOVIE', '', 15, 'HOROR', '18+'),
+(8, 'Project Hail Mary', '-', 120, 'gatau', '13+');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `promos`
+--
+
+CREATE TABLE `promos` (
+  `id` int(11) NOT NULL,
+  `kode_promo` varchar(50) NOT NULL,
+  `deskripsi` text DEFAULT NULL,
+  `diskon_persen` double DEFAULT 0,
+  `diskon_rupiah` double DEFAULT 0,
+  `tanggal_mulai` date NOT NULL,
+  `tanggal_akhir` date NOT NULL,
+  `aktif` tinyint(1) NOT NULL DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `promos`
+--
+
+INSERT INTO `promos` (`id`, `kode_promo`, `deskripsi`, `diskon_persen`, `diskon_rupiah`, `tanggal_mulai`, `tanggal_akhir`, `aktif`) VALUES
+(2, 'HEMAT50K', 'Hemat Rp 50.000 untuk tiket premium', 0, 50000, '2026-04-01', '2026-04-30', 0),
+(3, 'PromoOpening', 'Promo Opening Cinematix', 20, 0, '2026-04-21', '2026-05-21', 1);
 
 -- --------------------------------------------------------
 
@@ -83,9 +110,10 @@ CREATE TABLE `studios` (
 --
 
 INSERT INTO `studios` (`id`, `nama_studio`, `kapasitas`) VALUES
-(1, 'Studio 1', 50),
-(2, 'Studio 2', 40),
-(3, 'Studio 3', 30);
+(1, 'Reguler 2D', 50),
+(2, 'Reguler 3D', 40),
+(3, 'Premium', 40),
+(4, 'IMAX', 50);
 
 -- --------------------------------------------------------
 
@@ -170,32 +198,6 @@ INSERT INTO `users` (`id`, `nama`, `email`, `password`, `role`) VALUES
 (1, 'Admin Ganteng', 'admin@cinematix.com', 'admin123', 'Admin'),
 (2, 'User Biasa', 'user@gmail.com', '123', 'User');
 
--- --------------------------------------------------------
-
---
--- Table structure for table `promos`
---
-
-CREATE TABLE `promos` (
-  `id` int(11) NOT NULL,
-  `kode_promo` varchar(50) NOT NULL,
-  `deskripsi` text DEFAULT NULL,
-  `diskon_persen` decimal(5,2) DEFAULT 0.00,
-  `diskon_rupiah` decimal(10,2) DEFAULT 0.00,
-  `tanggal_mulai` date NOT NULL,
-  `tanggal_akhir` date NOT NULL,
-  `aktif` tinyint(1) DEFAULT 1
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `promos`
---
-
-INSERT INTO `promos` (`id`, `kode_promo`, `deskripsi`, `diskon_persen`, `diskon_rupiah`, `tanggal_mulai`, `tanggal_akhir`, `aktif`) VALUES
-(1, 'DISKON10', 'Diskon 10% untuk semua film', 10.00, 0.00, '2026-04-01', '2026-12-31', 1),
-(2, 'HEMAT5000', 'Hemat Rp 5.000 untuk tiket premium', 0.00, 5000.00, '2026-04-01', '2026-12-31', 1),
-(3, 'MOVIENIGHT', 'Diskon 15% untuk tayangan malam hari', 15.00, 0.00, '2026-04-15', '2026-04-30', 1);
-
 --
 -- Indexes for dumped tables
 --
@@ -205,6 +207,13 @@ INSERT INTO `promos` (`id`, `kode_promo`, `deskripsi`, `diskon_persen`, `diskon_
 --
 ALTER TABLE `movies`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `promos`
+--
+ALTER TABLE `promos`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `kode_promo` (`kode_promo`);
 
 --
 -- Indexes for table `schedules`
@@ -236,13 +245,6 @@ ALTER TABLE `users`
   ADD UNIQUE KEY `email` (`email`);
 
 --
--- Indexes for table `promos`
---
-ALTER TABLE `promos`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `kode_promo` (`kode_promo`);
-
---
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -250,7 +252,13 @@ ALTER TABLE `promos`
 -- AUTO_INCREMENT for table `movies`
 --
 ALTER TABLE `movies`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
+-- AUTO_INCREMENT for table `promos`
+--
+ALTER TABLE `promos`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `schedules`
@@ -262,7 +270,7 @@ ALTER TABLE `schedules`
 -- AUTO_INCREMENT for table `studios`
 --
 ALTER TABLE `studios`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `transactions`
@@ -275,12 +283,6 @@ ALTER TABLE `transactions`
 --
 ALTER TABLE `users`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- AUTO_INCREMENT for table `promos`
---
-ALTER TABLE `promos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- Constraints for dumped tables
