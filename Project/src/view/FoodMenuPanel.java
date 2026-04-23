@@ -210,8 +210,8 @@ public class FoodMenuPanel extends JPanel {
 
         JPanel qtyRow = new JPanel(new BorderLayout(4, 0));
         qtyRow.setBackground(QTY_BG);
-        qtyRow.setBorder(new EmptyBorder(2, 4, 2, 4));
-        qtyRow.setPreferredSize(new Dimension(0, 28));
+        qtyRow.setBorder(new EmptyBorder(3, 4, 3, 4));
+        qtyRow.setPreferredSize(new Dimension(0, 36));
         qtyRow.add(btnMinus, BorderLayout.WEST);
         qtyRow.add(lblQty,   BorderLayout.CENTER);
         qtyRow.add(btnPlus,  BorderLayout.EAST);
@@ -224,12 +224,12 @@ public class FoodMenuPanel extends JPanel {
 
     private JButton createQtyBtn(String label) {
         JButton btn = new JButton(label);
-        btn.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 16));
         btn.setBackground(QTY_BTN_BG);
         btn.setForeground(Color.WHITE);
         btn.setFocusPainted(false);
         btn.setBorderPainted(false);
-        btn.setPreferredSize(new Dimension(36, 26));
+        btn.setPreferredSize(new Dimension(45, 30));
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btn.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent e) { btn.setBackground(QTY_BTN_BG.brighter()); }
