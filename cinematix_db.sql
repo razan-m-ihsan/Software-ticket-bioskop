@@ -170,6 +170,32 @@ INSERT INTO `users` (`id`, `nama`, `email`, `password`, `role`) VALUES
 (1, 'Admin Ganteng', 'admin@cinematix.com', 'admin123', 'Admin'),
 (2, 'User Biasa', 'user@gmail.com', '123', 'User');
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `promos`
+--
+
+CREATE TABLE `promos` (
+  `id` int(11) NOT NULL,
+  `kode_promo` varchar(50) NOT NULL,
+  `deskripsi` text DEFAULT NULL,
+  `diskon_persen` decimal(5,2) DEFAULT 0.00,
+  `diskon_rupiah` decimal(10,2) DEFAULT 0.00,
+  `tanggal_mulai` date NOT NULL,
+  `tanggal_akhir` date NOT NULL,
+  `aktif` tinyint(1) DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `promos`
+--
+
+INSERT INTO `promos` (`id`, `kode_promo`, `deskripsi`, `diskon_persen`, `diskon_rupiah`, `tanggal_mulai`, `tanggal_akhir`, `aktif`) VALUES
+(1, 'DISKON10', 'Diskon 10% untuk semua film', 10.00, 0.00, '2026-04-01', '2026-12-31', 1),
+(2, 'HEMAT5000', 'Hemat Rp 5.000 untuk tiket premium', 0.00, 5000.00, '2026-04-01', '2026-12-31', 1),
+(3, 'MOVIENIGHT', 'Diskon 15% untuk tayangan malam hari', 15.00, 0.00, '2026-04-15', '2026-04-30', 1);
+
 --
 -- Indexes for dumped tables
 --
@@ -210,6 +236,13 @@ ALTER TABLE `users`
   ADD UNIQUE KEY `email` (`email`);
 
 --
+-- Indexes for table `promos`
+--
+ALTER TABLE `promos`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `kode_promo` (`kode_promo`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -242,6 +275,12 @@ ALTER TABLE `transactions`
 --
 ALTER TABLE `users`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `promos`
+--
+ALTER TABLE `promos`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- Constraints for dumped tables
