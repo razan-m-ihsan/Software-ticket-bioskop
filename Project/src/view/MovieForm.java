@@ -20,16 +20,35 @@ public class MovieForm extends JFrame {
 
     public MovieForm() {
         setTitle("Manajemen Film - CinemaTix");
-        setSize(800, 500);
+        setSize(900, 550);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(new Color(245, 245, 245));
 
-        // ===== FORM =====
-        JPanel formPanel = new JPanel(new GridLayout(7, 2, 10, 10));
+        // ===== HEADER PANEL WITH BACK BUTTON =====
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(new Color(245, 245, 245));
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        
+        JButton btnBack = new JButton("← Kembali");
+        btnBack.setBackground(new Color(189, 195, 199));
+        btnBack.setForeground(Color.WHITE);
+        btnBack.setFocusPainted(false);
+        btnBack.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        btnBack.setPreferredSize(new Dimension(100, 30));
+        btnBack.addActionListener(e -> {
+            dispose();
+            new AdminDashboard();
+        });
+        headerPanel.add(btnBack, BorderLayout.WEST);
+        panel.add(headerPanel, BorderLayout.NORTH);
+
+        // ===== FORM PANEL =====
+        JPanel formPanel = new JPanel(new GridLayout(6, 2, 10, 10));
         formPanel.setBorder(BorderFactory.createTitledBorder("Input Film"));
+        formPanel.setBackground(new Color(245, 245, 245));
 
         txtJudul = new JTextField();
         txtSinopsis = new JTextArea(3, 20);
@@ -52,29 +71,62 @@ public class MovieForm extends JFrame {
         formPanel.add(new JLabel("Rating"));
         formPanel.add(txtRating);
 
+        // ===== BUTTONS =====
         JButton btnTambah = new JButton("Tambah");
         JButton btnUpdate = new JButton("Update");
         JButton btnHapus = new JButton("Hapus");
+        JButton btnReset = new JButton("Reset");
 
-        formPanel.add(btnTambah);
-        formPanel.add(btnUpdate);
-        formPanel.add(btnHapus);
+        btnTambah.setBackground(new Color(52, 152, 219));
+        btnTambah.setForeground(Color.WHITE);
+        btnTambah.setFocusPainted(false);
 
-        // ===== TABLE =====
+        btnUpdate.setBackground(new Color(46, 204, 113));
+        btnUpdate.setForeground(Color.WHITE);
+        btnUpdate.setFocusPainted(false);
+
+        btnHapus.setBackground(new Color(231, 76, 60));
+        btnHapus.setForeground(Color.WHITE);
+        btnHapus.setFocusPainted(false);
+
+        btnReset.setBackground(new Color(149, 165, 166));
+        btnReset.setForeground(Color.WHITE);
+        btnReset.setFocusPainted(false);
+
+        JPanel buttonPanel = new JPanel(new GridLayout(1, 4, 10, 0));
+        buttonPanel.setBackground(new Color(245, 245, 245));
+        buttonPanel.add(btnTambah);
+        buttonPanel.add(btnUpdate);
+        buttonPanel.add(btnHapus);
+        buttonPanel.add(btnReset);
+
+        formPanel.add(buttonPanel);
+
+        // ===== TABLE PANEL =====
         model = new DefaultTableModel(new String[]{
                 "ID", "Judul", "Durasi", "Genre", "Rating"
-        }, 0);
+        }, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
 
         table = new JTable(model);
         JScrollPane scrollPane = new JScrollPane(table);
 
         table.setRowHeight(25);
-        table.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
+        table.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
+        table.getTableHeader().setBackground(new Color(52, 73, 94));
+        table.getTableHeader().setForeground(Color.WHITE);
 
-        panel.add(formPanel, BorderLayout.NORTH);
-        panel.add(scrollPane, BorderLayout.CENTER);
+        JPanel contentPanel = new JPanel(new BorderLayout());
+        contentPanel.setBackground(new Color(245, 245, 245));
+        contentPanel.add(formPanel, BorderLayout.NORTH);
+        contentPanel.add(scrollPane, BorderLayout.CENTER);
 
+        panel.add(contentPanel, BorderLayout.CENTER);
         add(panel);
 
         // LOAD DATA
@@ -84,6 +136,7 @@ public class MovieForm extends JFrame {
         btnTambah.addActionListener(e -> tambahFilm());
         btnUpdate.addActionListener(e -> updateFilm());
         btnHapus.addActionListener(e -> hapusFilm());
+        btnReset.addActionListener(e -> resetForm());
 
         // ===== EVENT KLIK TABEL =====
         table.getSelectionModel().addListSelectionListener(e -> {
@@ -118,6 +171,12 @@ public class MovieForm extends JFrame {
     // ===== TAMBAH =====
     private void tambahFilm() {
         try {
+            if (txtJudul.getText().trim().isEmpty() || txtDurasi.getText().trim().isEmpty() ||
+                txtGenre.getText().trim().isEmpty() || txtRating.getText().trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Semua field harus diisi!", "Peringatan", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
             Movie m = new Movie();
             m.setJudul(txtJudul.getText());
             m.setSinopsis(txtSinopsis.getText());
@@ -127,22 +186,28 @@ public class MovieForm extends JFrame {
 
             dao.insert(m);
             loadTable();
-            clearForm();
+            resetForm();
 
-            JOptionPane.showMessageDialog(this, "Film berhasil ditambahkan!");
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Input tidak valid!");
+            JOptionPane.showMessageDialog(this, "Film berhasil ditambahkan!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Durasi harus berupa angka!", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     // ===== UPDATE =====
     private void updateFilm() {
         if (selectedId == -1) {
-            JOptionPane.showMessageDialog(this, "Pilih data dulu!");
+            JOptionPane.showMessageDialog(this, "Pilih film yang akan diupdate!", "Peringatan", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         try {
+            if (txtJudul.getText().trim().isEmpty() || txtDurasi.getText().trim().isEmpty() ||
+                txtGenre.getText().trim().isEmpty() || txtRating.getText().trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Semua field harus diisi!", "Peringatan", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
             Movie m = new Movie();
             m.setId(selectedId);
             m.setJudul(txtJudul.getText());
@@ -153,33 +218,33 @@ public class MovieForm extends JFrame {
 
             dao.update(m);
             loadTable();
-            clearForm();
+            resetForm();
 
-            JOptionPane.showMessageDialog(this, "Film berhasil diupdate!");
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Input tidak valid!");
+            JOptionPane.showMessageDialog(this, "Film berhasil diupdate!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Durasi harus berupa angka!", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     // ===== DELETE =====
     private void hapusFilm() {
-        int row = table.getSelectedRow();
+        if (selectedId == -1) {
+            JOptionPane.showMessageDialog(this, "Pilih film yang akan dihapus!", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
-        if (row != -1) {
-            int id = (int) model.getValueAt(row, 0);
+        int confirm = JOptionPane.showConfirmDialog(this, "Yakin ingin menghapus film ini?", "Konfirmasi", JOptionPane.YES_NO_OPTION);
 
-            dao.delete(id);
+        if (confirm == JOptionPane.YES_OPTION) {
+            dao.delete(selectedId);
+            JOptionPane.showMessageDialog(this, "Film berhasil dihapus!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
+            resetForm();
             loadTable();
-            clearForm();
-
-            JOptionPane.showMessageDialog(this, "Film berhasil dihapus!");
-        } else {
-            JOptionPane.showMessageDialog(this, "Pilih data dulu!");
         }
     }
 
-    // ===== CLEAR FORM =====
-    private void clearForm() {
+    // ===== RESET FORM =====
+    private void resetForm() {
         txtJudul.setText("");
         txtSinopsis.setText("");
         txtDurasi.setText("");

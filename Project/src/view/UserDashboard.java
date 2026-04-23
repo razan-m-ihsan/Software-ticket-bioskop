@@ -1,6 +1,7 @@
 package view;
 
 import config.DatabaseConnection;
+import model.Promo;
 import java.awt.*;
 import java.awt.event.*;
 import java.net.URL;
@@ -38,6 +39,7 @@ public class UserDashboard extends JFrame {
     private List<String> selectedSeats      = new ArrayList<>();
     private long         foodTotal          = 0;
     private String       foodSummary        = "";   // e.g. "Popcorn Caramel Large x2, ..."
+    private Promo        selectedPromo      = null; // Selected promo for discount
 
     // ── Persistent sub-panels (keep state between dialog opens) ───────────────
     private SeatSelectionPanel persistentSeatPanel = null;
@@ -52,6 +54,13 @@ public class UserDashboard extends JFrame {
         "Studio 3 - Reguler 3D",
         "Studio 2 - Premium",
         "Studio 1 - IMAX"
+    };
+    // Harga per studio (dalam Rupiah)
+    private static final int[] STUDIO_PRICES = {
+        75_000,   // Reguler 2D
+        85_000,   // Reguler 3D
+        100_000,  // Premium
+        150_000   // IMAX
     };
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -239,8 +248,7 @@ public class UserDashboard extends JFrame {
         btnReset.addActionListener(e     -> resetPesanan());
         btnTrailer.addActionListener(e   -> JOptionPane.showMessageDialog(this,
                 "Fitur Lihat Trailer segera hadir!", "Info", JOptionPane.INFORMATION_MESSAGE));
-        btnPromo.addActionListener(e     -> JOptionPane.showMessageDialog(this,
-                "Fitur Gunakan Promo segera hadir!", "Info", JOptionPane.INFORMATION_MESSAGE));
+        btnPromo.addActionListener(e     -> showPromoDialog());
 
         wrapper.add(menuBox, BorderLayout.CENTER);
         return wrapper;
@@ -355,6 +363,12 @@ public class UserDashboard extends JFrame {
     // DIALOG 1 — JAM & STUDIO
     // ──────────────────────────────────────────────────────────────────────────
     private void showJamStudioDialog() {
+        // Validasi: Film harus dipilih dulu
+        if (filmList.getSelectedIndex() < 0 || txtJudul.getText().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Pilih film terlebih dahulu!", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
         JDialog dialog = new JDialog(this, "Pilih Jam & Studio", true);
         dialog.setSize(530, 330);
         dialog.setLocationRelativeTo(this);
@@ -379,23 +393,52 @@ public class UserDashboard extends JFrame {
         for (int i = 0; i < STUDIO_TYPES.length; i++) {
             if (STUDIO_LABELS[i].equals(selectedStudioName)) highlightStudio(sBtns, i);
         }
-        for (int i = 0; i < STUDIO_TYPES.length; i++) {
-            final int idx = i;
-            sBtns[i].addActionListener(e -> { highlightStudio(sBtns, idx); tempStudio[0] = STUDIO_LABELS[idx]; });
-        }
+
+        // Create placeholder for time grid initially hidden
+        JPanel centerPanel = new JPanel(new BorderLayout());
+        centerPanel.setBackground(new Color(52, 52, 52));
 
         JPanel timeGrid = new JPanel(new GridLayout(2, 3, 10, 10));
         timeGrid.setBackground(new Color(52, 52, 52));
+        timeGrid.setVisible(false); // Hidden until studio is selected
+        
         JButton[] tBtns = new JButton[TIME_SLOTS.length];
         String[] tempTime = {selectedTime};
+        int[] currentStudioPrice = {HARGA_INT}; // Track current studio price
 
         for (int i = 0; i < TIME_SLOTS.length; i++) {
-            tBtns[i] = createTimeBtn(TIME_SLOTS[i]);
+            tBtns[i] = createTimeBtn(TIME_SLOTS[i], currentStudioPrice[0]);
             timeGrid.add(tBtns[i]);
         }
         // Highlight after all buttons are added
         for (int i = 0; i < TIME_SLOTS.length; i++) {
             if (TIME_SLOTS[i].equals(selectedTime)) highlightTime(tBtns, i);
+        }
+
+        // Placeholder message when no studio selected
+        JLabel placeholderMsg = new JLabel("Pilih studio terlebih dahulu untuk melihat jam tayang", SwingConstants.CENTER);
+        placeholderMsg.setForeground(new Color(150, 150, 150));
+        placeholderMsg.setFont(new Font("Segoe UI", Font.ITALIC, 12));
+        centerPanel.add(placeholderMsg, BorderLayout.CENTER);
+        
+        // Studio selection enables jam buttons and updates prices
+        for (int i = 0; i < STUDIO_TYPES.length; i++) {
+            final int idx = i;
+            sBtns[i].addActionListener(e -> { 
+                highlightStudio(sBtns, idx); 
+                tempStudio[0] = STUDIO_LABELS[idx];
+                currentStudioPrice[0] = STUDIO_PRICES[idx];
+                // Update price labels on all time buttons
+                updateTimeBtnPrices(tBtns, STUDIO_PRICES[idx]);
+                // Show time grid and enable jam buttons ketika studio dipilih
+                timeGrid.setVisible(true);
+                placeholderMsg.setVisible(false);
+                centerPanel.removeAll();
+                centerPanel.add(timeGrid, BorderLayout.CENTER);
+                centerPanel.revalidate();
+                centerPanel.repaint();
+                for (JButton btn : tBtns) btn.setEnabled(true);
+            });
         }
         for (int i = 0; i < TIME_SLOTS.length; i++) {
             final int idx = i;
@@ -424,9 +467,9 @@ public class UserDashboard extends JFrame {
         btnRow.setBackground(new Color(52, 52, 52));
         btnRow.add(btnOk);
 
-        main.add(studioRow, BorderLayout.NORTH);
-        main.add(timeGrid,  BorderLayout.CENTER);
-        main.add(btnRow,    BorderLayout.SOUTH);
+        main.add(studioRow,    BorderLayout.NORTH);
+        main.add(centerPanel,  BorderLayout.CENTER);
+        main.add(btnRow,       BorderLayout.SOUTH);
         dialog.add(main);
         dialog.setVisible(true);
     }
@@ -435,6 +478,12 @@ public class UserDashboard extends JFrame {
     // DIALOG 2 — PILIH KURSI  (uses SeatSelectionPanel — matches picture 1)
     // ──────────────────────────────────────────────────────────────────────────
     private void showKursiDialog() {
+        // Validasi: Studio dan Jam harus dipilih dulu
+        if (selectedStudioName.isEmpty() || selectedTime.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Pilih studio dan jam tayang terlebih dahulu!", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
         JDialog dialog = new JDialog(this, "Pilih Kursi", true);
         dialog.setResizable(false);
         dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
@@ -442,8 +491,9 @@ public class UserDashboard extends JFrame {
         // Create once; reuse on subsequent opens so selections are remembered
         if (persistentSeatPanel == null) {
             persistentSeatPanel = new SeatSelectionPanel((SeatSelectionPanel.SeatCallback) seats -> { /* live update */ });
-            persistentSeatPanel.setHargaSatuan(HARGA_INT);
         }
+        // Update harga sesuai studio yang dipilih
+        persistentSeatPanel.setHargaSatuan(getStudioPrice(selectedStudioName));
 
         JButton btnOk = new JButton("Konfirmasi Kursi");
         btnOk.setBackground(new Color(45, 85, 200));
@@ -478,6 +528,12 @@ public class UserDashboard extends JFrame {
     // DIALOG 3 — MAKANAN & MINUMAN  (uses FoodMenuPanel — matches picture 2)
     // ──────────────────────────────────────────────────────────────────────────
     private void showFoodDialog() {
+        // Validasi: Kursi harus dipilih dulu
+        if (selectedSeats.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Pilih kursi terlebih dahulu!", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
         JDialog dialog = new JDialog(this, "Makanan & Minuman", true);
         dialog.setResizable(false);
         dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
@@ -542,6 +598,34 @@ public class UserDashboard extends JFrame {
     }
 
     // ──────────────────────────────────────────────────────────────────────────
+    // DIALOG 4 — PILIH PROMO
+    // ──────────────────────────────────────────────────────────────────────────
+    private void showPromoDialog() {
+        // Validasi: Film harus dipilih dulu (promo bisa digunakan kapan saja setelah film dipilih)
+        if (filmList.getSelectedIndex() < 0 || txtJudul.getText().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Pilih film terlebih dahulu!", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        PromoPage promoPage = new PromoPage(this);
+        promoPage.setVisible(true);
+
+        // If user selected a promo, apply it
+        if (promoPage.getSelectedPromo() != null) {
+            selectedPromo = promoPage.getSelectedPromo();
+            String diskonInfo = selectedPromo.getDiskonPersen() > 0 ?
+                selectedPromo.getDiskonPersen() + "%" :
+                "Rp " + String.format("%,.0f", selectedPromo.getDiskonRupiah());
+            JOptionPane.showMessageDialog(this,
+                "Promo \"" + selectedPromo.getKodePromo() + "\" berhasil diterapkan!\n" +
+                "Diskon: " + diskonInfo + "\nSilakan lanjutkan ke pembayaran.",
+                "Promo Diterapkan", JOptionPane.INFORMATION_MESSAGE);
+            // Recalculate total with new promo
+            recalcTotal();
+        }
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
     // FIELD UPDATE HELPERS
     // ──────────────────────────────────────────────────────────────────────────
     private void updateKursiField() {
@@ -567,7 +651,9 @@ public class UserDashboard extends JFrame {
     }
 
     private void recalcTotal() {
-        long seatTotal = (long) selectedSeats.size() * HARGA_INT;
+        // Use the actual studio price, not the default price
+        int studioPrice = !selectedStudioName.isEmpty() ? getStudioPrice(selectedStudioName) : 0;
+        long seatTotal = (long) selectedSeats.size() * studioPrice;
         long grand     = seatTotal + foodTotal;
 
         if (grand == 0 && selectedSeats.isEmpty()) {
@@ -587,6 +673,7 @@ public class UserDashboard extends JFrame {
     private void resetPesanan() {
         selectedStudioName = ""; selectedTime = ""; selectedSeats.clear();
         foodTotal = 0; foodSummary = "";
+        selectedPromo = null; // Reset selected promo
         // Reset persistent sub-panels so their internal state clears too
         if (persistentSeatPanel != null) persistentSeatPanel.resetSelections();
         if (persistentFoodPanel  != null) persistentFoodPanel.resetOrder();
@@ -609,9 +696,20 @@ public class UserDashboard extends JFrame {
             JOptionPane.showMessageDialog(this, "Pilih kursi terlebih dahulu!", "Peringatan", JOptionPane.WARNING_MESSAGE); return;
         }
 
-        long seatTotal = (long) selectedSeats.size() * HARGA_INT;
+        long seatTotal = (long) selectedSeats.size() * getStudioPrice(selectedStudioName);
         long subtotal = seatTotal + foodTotal;
-        long promoValue = subtotal >= 665_000 ? 30_000 : 0;
+        long promoValue = 0;
+        
+        // Calculate discount based on selected promo
+        if (selectedPromo != null) {
+            if (selectedPromo.getDiskonPersen() > 0) {
+                // Percentage discount
+                promoValue = (long) (subtotal * selectedPromo.getDiskonPersen() / 100);
+            } else if (selectedPromo.getDiskonRupiah() > 0) {
+                // Fixed rupiah discount
+                promoValue = (long) selectedPromo.getDiskonRupiah();
+            }
+        }
         long finalTotal = Math.max(0, subtotal - promoValue);
 
         PaymentPageFrame paymentPage = new PaymentPageFrame(
@@ -654,6 +752,16 @@ public class UserDashboard extends JFrame {
                     ? BorderFactory.createLineBorder(new Color(240, 60, 60), 2)
                     : BorderFactory.createLineBorder(new Color(130, 100, 0), 2));
         }
+    }
+
+    // ✅ Dapatkan harga berdasarkan studio yang dipilih
+    private int getStudioPrice(String studioLabel) {
+        for (int i = 0; i < STUDIO_LABELS.length; i++) {
+            if (STUDIO_LABELS[i].equals(studioLabel)) {
+                return STUDIO_PRICES[i];
+            }
+        }
+        return HARGA_INT; // default price
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -704,7 +812,7 @@ public class UserDashboard extends JFrame {
         return btn;
     }
 
-    private JButton createTimeBtn(String time) {
+    private JButton createTimeBtn(String time, int price) {
         JButton btn = new JButton();
         btn.setLayout(new BorderLayout());
         btn.setBackground(new Color(58, 58, 58));
@@ -717,12 +825,13 @@ public class UserDashboard extends JFrame {
         lblTime.setFont(new Font("Segoe UI", Font.BOLD, 20));
         lblTime.setForeground(Color.WHITE);
 
-        JLabel lblPrice = new JLabel(HARGA_DEFAULT, SwingConstants.CENTER);
+        JLabel lblPrice = new JLabel("Rp " + String.format("%,d", price).replace(',', '.'), SwingConstants.CENTER);
         lblPrice.setFont(new Font("Segoe UI", Font.BOLD, 10));
         lblPrice.setForeground(Color.WHITE);
         lblPrice.setOpaque(true);
         lblPrice.setBackground(new Color(160, 110, 0));
         lblPrice.setBorder(new EmptyBorder(2, 6, 2, 6));
+        lblPrice.setName("priceLabel"); // Set name for identification
 
         JPanel priceRow = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 2));
         priceRow.setOpaque(false);
@@ -735,6 +844,32 @@ public class UserDashboard extends JFrame {
         inner.add(priceRow, BorderLayout.SOUTH);
         btn.add(inner, BorderLayout.CENTER);
         return btn;
+    }
+
+    /** Update price labels on all time buttons when studio changes */
+    private void updateTimeBtnPrices(JButton[] timeBtns, int newPrice) {
+        String priceText = "Rp " + String.format("%,d", newPrice).replace(',', '.');
+        for (JButton btn : timeBtns) {
+            // Find the price label inside the button and update it
+            Component[] components = btn.getComponents();
+            for (Component comp : components) {
+                if (comp instanceof JPanel) {
+                    updatePriceLabelRecursive((JPanel) comp, priceText);
+                }
+            }
+        }
+    }
+
+    /** Recursively find and update price label */
+    private void updatePriceLabelRecursive(JPanel panel, String priceText) {
+        for (Component comp : panel.getComponents()) {
+            if (comp instanceof JLabel && "priceLabel".equals(comp.getName())) {
+                ((JLabel) comp).setText(priceText);
+                return;
+            } else if (comp instanceof JPanel) {
+                updatePriceLabelRecursive((JPanel) comp, priceText);
+            }
+        }
     }
 
     // ──────────────────────────────────────────────────────────────────────────

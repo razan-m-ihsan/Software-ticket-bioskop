@@ -7,7 +7,7 @@ public class AdminDashboard extends JFrame {
 
     public AdminDashboard() {
         setTitle("Admin Dashboard - CinemaTix");
-        setSize(500, 450);
+        setSize(500, 520);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
@@ -41,9 +41,18 @@ public class AdminDashboard extends JFrame {
         btnJadwal.setFont(new Font("Segoe UI", Font.BOLD, 14));
         panel.add(btnJadwal);
 
+        // ===== BUTTON KELOLA PROMO =====
+        JButton btnPromo = new JButton("Kelola Promo");
+        btnPromo.setBounds(150, 240, 200, 40);
+        btnPromo.setBackground(new Color(155, 89, 182));
+        btnPromo.setForeground(Color.WHITE);
+        btnPromo.setFocusPainted(false);
+        btnPromo.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        panel.add(btnPromo);
+
         // ===== BUTTON LOGOUT =====
         JButton btnLogout = new JButton("Logout");
-        btnLogout.setBounds(150, 240, 200, 40);
+        btnLogout.setBounds(150, 300, 200, 40);
         btnLogout.setBackground(new Color(231, 76, 60));
         btnLogout.setForeground(Color.WHITE);
         btnLogout.setFocusPainted(false);
@@ -57,6 +66,10 @@ public class AdminDashboard extends JFrame {
 
         btnJadwal.addActionListener(e -> {
             new ScheduleForm().setVisible(true);
+        });
+
+        btnPromo.addActionListener(e -> {
+            new PromoForm().setVisible(true);
         });
 
         btnLogout.addActionListener(e -> {
