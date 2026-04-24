@@ -57,7 +57,7 @@ public class SeatSelectionPanel extends JPanel {
     }
 
     public SeatSelectionPanel(Object callback2) {
-        //TODO Auto-generated constructor stub
+        this(callback2 instanceof SeatCallback ? (SeatCallback) callback2 : seats -> {});
     }
 
     /** Call this before showing the panel to set the ticket price. */

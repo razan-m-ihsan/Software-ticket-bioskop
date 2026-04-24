@@ -13,11 +13,10 @@ public class DatabaseConnection {
     public static Connection getConnection() {
         try {
             Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
-            System.out.println("Koneksi berhasil!");
             return conn;
         } catch (SQLException e) {
             System.out.println("Koneksi gagal: " + e.getMessage());
-            return null;
+            throw new RuntimeException("Database connection failed: " + e.getMessage(), e);
         }
     }
 }

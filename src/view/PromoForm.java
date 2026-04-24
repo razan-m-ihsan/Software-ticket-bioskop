@@ -21,7 +21,9 @@ public class PromoForm extends JFrame {
 
     public PromoForm() {
         setTitle("Manajemen Promo - CinemaTix");
-        setSize(900, 550);
+        setSize(900, 580);
+        setMinimumSize(new Dimension(700, 460));
+        setResizable(true);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
@@ -41,7 +43,7 @@ public class PromoForm extends JFrame {
         btnBack.setPreferredSize(new Dimension(100, 30));
         btnBack.addActionListener(e -> {
             dispose();
-            new AdminDashboard().setVisible(true);
+            new AdminDashboard().setVisible(true);  // ← add .setVisible(true)
         });
         headerPanel.add(btnBack, BorderLayout.WEST);
         mainPanel.add(headerPanel, BorderLayout.NORTH);

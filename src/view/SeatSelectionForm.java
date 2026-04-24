@@ -26,7 +26,9 @@ public class SeatSelectionForm extends JFrame {
         this.harga = harga;
 
         setTitle("CinemaTix - Pilih Kursi");
-        setSize(700, 550);
+        setSize(750, 580);
+        setMinimumSize(new Dimension(620, 480));
+        setResizable(true);
         setLocationRelativeTo(null);
 
         initUI();
@@ -134,7 +136,8 @@ public class SeatSelectionForm extends JFrame {
     }
 
     private void updateTotal() {
-        lblTotal.setText("Total: Rp " + (selectedSeats.size() * harga));
+        double total = selectedSeats.size() * harga;
+        lblTotal.setText(String.format("Total: Rp %,.0f", total));
     }
 
     private void saveTransaction() {

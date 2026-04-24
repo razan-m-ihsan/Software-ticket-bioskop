@@ -93,8 +93,7 @@ public class PromoPage extends JDialog {
 
     private void loadPromos() {
         PromoDAO promoDAO = new PromoDAO();
-        // For debugging, use getAll() instead of getActivePromos()
-        promos = promoDAO.getAll(); // Changed from getActivePromos()
+        promos = promoDAO.getActivePromos();
 
         listModel.clear();
         if (promos.isEmpty()) {

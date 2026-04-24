@@ -15,6 +15,8 @@ public class RegisterForm extends JFrame {
     public RegisterForm() {
         setTitle("Register CineTix");
         setSize(900, 650);
+        setMinimumSize(new Dimension(700, 540));
+        setResizable(true);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
@@ -139,11 +141,14 @@ public class RegisterForm extends JFrame {
 
     // ===== REGISTER LOGIC =====
     private void registerAction() {
-        String nama = txtNama.getText();
-        String email = txtEmail.getText();
-        String password = new String(txtPassword.getPassword());
+        String nama = txtNama.getText().trim();
+        String email = txtEmail.getText().trim();
+        String password = new String(txtPassword.getPassword()).trim();
 
-        if (nama.isEmpty() || email.isEmpty() || password.isEmpty()) {
+        // Also check against placeholder values
+        if (nama.isEmpty() || nama.equals("Full Name") ||
+            email.isEmpty() || email.equals("Email") ||
+            password.isEmpty() || password.equals("Password")) {
             JOptionPane.showMessageDialog(this, "Semua field harus diisi!");
             return;
         }

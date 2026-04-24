@@ -4,6 +4,7 @@ import config.DatabaseConnection;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import java.awt.Dimension;
 import java.sql.*;
 
 public class TransactionHistoryForm extends JFrame {
@@ -11,7 +12,9 @@ public class TransactionHistoryForm extends JFrame {
     public TransactionHistoryForm(int userId) {
 
         setTitle("Riwayat Transaksi");
-        setSize(700, 400);
+        setSize(750, 440);
+        setMinimumSize(new Dimension(600, 380));
+        setResizable(true);
         setLocationRelativeTo(null);
 
         String[] kolom = {"Film", "Kursi", "Harga", "Waktu"};

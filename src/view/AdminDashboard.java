@@ -54,8 +54,6 @@ public class AdminDashboard extends JFrame {
 
         // Event
         btnPromo.addActionListener(e -> new PromoForm().setVisible(true));
-
-        // ===== BUTTON LOGOUT =====
         JButton btnLogout = new JButton("Logout");
         btnLogout.setBounds(150, 300, 200, 40);
         btnLogout.setBackground(new Color(231, 76, 60));
@@ -74,6 +72,7 @@ public class AdminDashboard extends JFrame {
         });
 
         btnPromo.addActionListener(e -> {
+            dispose();
             new PromoForm().setVisible(true);
         });
 

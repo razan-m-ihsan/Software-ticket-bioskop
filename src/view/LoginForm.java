@@ -14,6 +14,8 @@ public class LoginForm extends JFrame {
     public LoginForm() {
         setTitle("CineTix Login");
         setSize(900, 600);
+        setMinimumSize(new Dimension(700, 480));
+        setResizable(true);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 

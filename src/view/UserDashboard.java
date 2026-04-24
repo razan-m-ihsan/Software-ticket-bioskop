@@ -64,7 +64,36 @@ public class UserDashboard extends JFrame {
     };
 
     // ─────────────────────────────────────────────────────────────────────────
+    // ── State restoration (used when returning from PaymentPageFrame) ──────────
+    public static class RestoredState {
+        public final int          filmIndex;
+        public final String       studioName;
+        public final String       time;
+        public final String       cinema;
+        public final List<String> seats;
+        public final long         foodTotal;
+        public final String       foodSummary;
+        public final Promo        promo;
+
+        public RestoredState(int filmIndex, String studioName, String time,
+                            String cinema, List<String> seats,
+                            long foodTotal, String foodSummary, Promo promo) {
+            this.filmIndex   = filmIndex;
+            this.studioName  = studioName;
+            this.time        = time;
+            this.cinema      = cinema;
+            this.seats       = seats;
+            this.foodTotal   = foodTotal;
+            this.foodSummary = foodSummary;
+            this.promo       = promo;
+        }
+    }
+    
     public UserDashboard(int userId) {
+    this(userId, null);
+}
+
+    public UserDashboard(int userId, RestoredState state) {
         this.userId = userId;
         setTitle("CineTix");
         setSize(980, 750);
@@ -96,7 +125,48 @@ public class UserDashboard extends JFrame {
             }
         });
 
+        // Restore previous order state if returning from payment page
+        if (state != null) {
+            restoreState(state);
+        }
+
         setVisible(true);
+    }
+
+    private void restoreState(RestoredState state) {
+        if (state.cinema != null && !state.cinema.isEmpty()) {
+            selectedCinema = state.cinema;
+        }
+
+        // Select the film (this triggers loadDetailFilm which resets fields,
+        // so we repopulate everything after)
+        if (state.filmIndex >= 0 && state.filmIndex < listModel.size()) {
+            filmList.setSelectedIndex(state.filmIndex);
+        }
+
+        selectedStudioName = state.studioName != null ? state.studioName : "";
+        selectedTime       = state.time       != null ? state.time       : "";
+
+        if (!selectedStudioName.isEmpty()) {
+            txtStudio.setText(selectedStudioName);
+            txtStudio.setForeground(Color.WHITE);
+        }
+        if (!selectedTime.isEmpty()) {
+            txtJamTayang.setText(selectedTime);
+            txtJamTayang.setForeground(Color.WHITE);
+        }
+
+        selectedSeats.clear();
+        if (state.seats != null) selectedSeats.addAll(state.seats);
+        updateKursiField();
+
+        foodTotal   = state.foodTotal;
+        foodSummary = state.foodSummary != null ? state.foodSummary : "";
+        updateMakananField();
+
+        selectedPromo = state.promo;
+
+        recalcTotal();
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -654,7 +724,18 @@ public class UserDashboard extends JFrame {
         // Use the actual studio price, not the default price
         int studioPrice = !selectedStudioName.isEmpty() ? getStudioPrice(selectedStudioName) : 0;
         long seatTotal = (long) selectedSeats.size() * studioPrice;
-        long grand     = seatTotal + foodTotal;
+        long subtotal  = seatTotal + foodTotal;
+
+        // Apply promo discount
+        long promoValue = 0;
+        if (selectedPromo != null && subtotal > 0) {
+            if (selectedPromo.getDiskonPersen() > 0) {
+                promoValue = (long) (subtotal * selectedPromo.getDiskonPersen() / 100);
+            } else if (selectedPromo.getDiskonRupiah() > 0) {
+                promoValue = (long) selectedPromo.getDiskonRupiah();
+            }
+        }
+        long grand = Math.max(0, subtotal - promoValue);
 
         if (grand == 0 && selectedSeats.isEmpty()) {
             ph(txtTotal, "-");
@@ -697,20 +778,28 @@ public class UserDashboard extends JFrame {
         }
 
         long seatTotal = (long) selectedSeats.size() * getStudioPrice(selectedStudioName);
-        long subtotal = seatTotal + foodTotal;
+        long subtotal  = seatTotal + foodTotal;
         long promoValue = 0;
-        
-        // Calculate discount based on selected promo
+
         if (selectedPromo != null) {
-            if (selectedPromo.getDiskonPersen() > 0) {
-                // Percentage discount
+            if (selectedPromo.getDiskonPersen() > 0)
                 promoValue = (long) (subtotal * selectedPromo.getDiskonPersen() / 100);
-            } else if (selectedPromo.getDiskonRupiah() > 0) {
-                // Fixed rupiah discount
+            else if (selectedPromo.getDiskonRupiah() > 0)
                 promoValue = (long) selectedPromo.getDiskonRupiah();
-            }
         }
         long finalTotal = Math.max(0, subtotal - promoValue);
+
+        // ← NEW: capture state snapshot so PaymentPageFrame can restore it on Kembali
+        RestoredState snapshot = new RestoredState(
+                filmList.getSelectedIndex(),
+                selectedStudioName,
+                selectedTime,
+                selectedCinema,
+                new ArrayList<>(selectedSeats),
+                foodTotal,
+                foodSummary,
+                selectedPromo
+        );
 
         PaymentPageFrame paymentPage = new PaymentPageFrame(
                 userId,
@@ -725,7 +814,8 @@ public class UserDashboard extends JFrame {
                 foodSummary,
                 subtotal,
                 promoValue,
-                finalTotal
+                finalTotal,
+                snapshot   // ← NEW
         );
         paymentPage.setVisible(true);
         dispose();
@@ -943,8 +1033,9 @@ public class UserDashboard extends JFrame {
     private void loadDetailFilm(int filmId) {
         try {
             Connection conn = DatabaseConnection.getConnection();
-            ResultSet  rs   = conn.createStatement()
-                    .executeQuery("SELECT * FROM movies WHERE id=" + filmId);
+            PreparedStatement ps = conn.prepareStatement("SELECT * FROM movies WHERE id=?");
+            ps.setInt(1, filmId);
+            ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 txtJudul.setText(rs.getString("judul"));
                 txtJudul.setForeground(Color.WHITE);
@@ -955,9 +1046,11 @@ public class UserDashboard extends JFrame {
                 ph(txtTotal,     "-");
                 selectedStudioName = ""; selectedTime = "";
                 selectedSeats.clear(); foodTotal = 0; foodSummary = "";
+                selectedPromo = null;
                 if (persistentSeatPanel != null) persistentSeatPanel.resetSelections();
                 if (persistentFoodPanel  != null) persistentFoodPanel.resetOrder();
             }
+            rs.close(); ps.close(); conn.close();
         } catch (Exception e) { e.printStackTrace(); }
     }
 
