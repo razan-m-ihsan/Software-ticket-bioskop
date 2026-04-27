@@ -43,6 +43,8 @@ public class UserDashboard extends JFrame {
     private String       foodSummary        = "";   // e.g. "Popcorn Caramel Large x2, ..."
     private Promo        selectedPromo      = null; // Selected promo for discount
 
+    private static final Map<String, Set<String>> paidSeatHistory = new HashMap<>();
+
     // ── Persistent sub-panels (keep state between dialog opens) ───────────────
     private SeatSelectionPanel persistentSeatPanel = null;
     private FoodMenuPanel      persistentFoodPanel = null;
@@ -549,6 +551,8 @@ public class UserDashboard extends JFrame {
     // ──────────────────────────────────────────────────────────────────────────
     // DIALOG 2 — PILIH KURSI  (uses SeatSelectionPanel — matches picture 1)
     // ──────────────────────────────────────────────────────────────────────────
+    private String persistentSeatKey = "";
+
     private void showKursiDialog() {
         // Validasi: Studio dan Jam harus dipilih dulu
         if (selectedStudioName.isEmpty() || selectedTime.isEmpty()) {
@@ -560,9 +564,13 @@ public class UserDashboard extends JFrame {
         dialog.setResizable(false);
         dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
-        // Create once; reuse on subsequent opens so selections are remembered
-        if (persistentSeatPanel == null) {
-            persistentSeatPanel = new SeatSelectionPanel((SeatSelectionPanel.SeatCallback) seats -> { /* live update */ });
+        String seatKey = buildSeatSelectionKey();
+        if (persistentSeatPanel == null || !seatKey.equals(persistentSeatKey)) {
+            java.util.List<String> takenSeats = loadTakenSeatsForCurrentSelection();
+            persistentSeatPanel = new SeatSelectionPanel((SeatSelectionPanel.SeatCallback) seats -> { /* live update */ }, takenSeats);
+            persistentSeatKey = seatKey;
+        } else {
+            persistentSeatPanel.setTakenSeats(loadTakenSeatsForCurrentSelection());
         }
         // Update harga sesuai studio yang dipilih
         persistentSeatPanel.setHargaSatuan(getStudioPrice(selectedStudioName));
@@ -712,6 +720,87 @@ public class UserDashboard extends JFrame {
         recalcTotal();
     }
 
+    private String buildSeatSelectionKey() {
+        return txtJudul.getText().trim() + "|" + selectedStudioName + "|" + selectedTime;
+    }
+
+    private java.util.List<String> loadTakenSeatsForCurrentSelection() {
+        String key = buildSeatSelectionKey();
+        java.util.List<String> bookings = new ArrayList<>();
+        int scheduleId = findScheduleId(txtJudul.getText(), selectedStudioName, selectedTime);
+        if (scheduleId > 0) {
+            bookings = getBookedSeatsForSchedule(scheduleId);
+        }
+        if (bookings.isEmpty()) {
+            bookings = SeatSelectionPanel.generatePseudoTakenSeats(key);
+        }
+        Set<String> paid = paidSeatHistory.getOrDefault(key, Collections.emptySet());
+        bookings.addAll(paid);
+        return bookings;
+    }
+
+    private void addPaidSeatsToHistory(String key, List<String> seats) {
+        if (key == null || key.isEmpty() || seats == null || seats.isEmpty()) return;
+        Set<String> paid = paidSeatHistory.computeIfAbsent(key, k -> new HashSet<>());
+        paid.addAll(seats);
+    }
+
+    private int findScheduleId(String movieTitle, String studioLabel, String jam) {
+        try {
+            Connection conn = DatabaseConnection.getConnection();
+            String studioName = getStudioNameFromLabel(studioLabel);
+            String query = "SELECT s.id FROM schedules s " +
+                    "JOIN movies m ON s.movie_id = m.id " +
+                    "JOIN studios st ON s.studio_id = st.id " +
+                    "WHERE m.judul = ? AND st.nama_studio = ? AND s.jam_tayang = ? LIMIT 1";
+            PreparedStatement ps = conn.prepareStatement(query);
+            ps.setString(1, movieTitle);
+            ps.setString(2, studioName);
+            ps.setString(3, normalizeTimeForDb(jam));
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("id");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    private java.util.List<String> getBookedSeatsForSchedule(int scheduleId) {
+        java.util.List<String> seats = new ArrayList<>();
+        try {
+            Connection conn = DatabaseConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(
+                    "SELECT nomor_kursi FROM transactions WHERE schedule_id = ? AND status = 'SUCCESS'"
+            );
+            ps.setInt(1, scheduleId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                seats.add(rs.getString("nomor_kursi"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return seats;
+    }
+
+    private String normalizeTimeForDb(String jam) {
+        if (jam == null || jam.isEmpty()) return "";
+        String normalized = jam.replace('.', ':').trim();
+        if (normalized.length() == 5) normalized += ":00";
+        return normalized;
+    }
+
+    private String getStudioNameFromLabel(String label) {
+        if (label == null) return "";
+        if (label.contains("Reguler 2D")) return "Reguler 2D";
+        if (label.contains("Reguler 3D")) return "Reguler 3D";
+        if (label.contains("Premium")) return "Premium";
+        if (label.contains("IMAX")) return "IMAX";
+        return label;
+    }
+
     /** Update the "Makanan & Minuman" field with the food order summary. */
     private void updateMakananField() {
         if (foodSummary == null || foodSummary.isEmpty()) {
@@ -790,6 +879,9 @@ public class UserDashboard extends JFrame {
                 promoValue = (long) selectedPromo.getDiskonRupiah();
         }
         long finalTotal = Math.max(0, subtotal - promoValue);
+
+        String seatKey = buildSeatSelectionKey();
+        addPaidSeatsToHistory(seatKey, selectedSeats);
 
         // ← NEW: capture state snapshot so PaymentPageFrame can restore it on Kembali
         RestoredState snapshot = new RestoredState(

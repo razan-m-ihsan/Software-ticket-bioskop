@@ -1,11 +1,10 @@
 package view;
 
-import javax.swing.*;
-import javax.swing.border.*;
 import java.awt.*;
-import java.awt.event.*;
 import java.util.*;
 import java.util.List;
+import javax.swing.*;
+import javax.swing.border.*;
 
 public class SeatSelectionPanel extends JPanel {
 
@@ -47,17 +46,21 @@ public class SeatSelectionPanel extends JPanel {
 
     // ─────────────────────────────────────────────────────────
     public SeatSelectionPanel(SeatCallback callback) {
+        this(callback, null);
+    }
+
+    public SeatSelectionPanel(SeatCallback callback, java.util.List<String> takenSeats) {
         this.callback = callback;
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         setBackground(new Color(42, 42, 42));
 
-        initDefaultTaken();
+        initTakenSeats(takenSeats);
         buildUI();
     }
 
     public SeatSelectionPanel(Object callback2) {
-        this(callback2 instanceof SeatCallback ? (SeatCallback) callback2 : seats -> {});
+        this(callback2 instanceof SeatCallback ? (SeatCallback) callback2 : seats -> {}, null);
     }
 
     /** Call this before showing the panel to set the ticket price. */
@@ -69,15 +72,33 @@ public class SeatSelectionPanel extends JPanel {
     // ─────────────────────────────────────────────────────────
     // DEFAULT TAKEN SEATS (matching the screenshot)
     // ─────────────────────────────────────────────────────────
+    private void initTakenSeats(java.util.List<String> takenSeats) {
+        clearSeatStates();
+        if (takenSeats == null || takenSeats.isEmpty()) {
+            initDefaultTaken();
+            return;
+        }
+
+        for (String s : takenSeats) {
+            int[] idx = seatKey(s);
+            if (idx != null) state[idx[0]][idx[1]] = TAKEN_X;
+        }
+    }
+
+    private void clearSeatStates() {
+        for (int r = 0; r < ROWS.length; r++) {
+            for (int c = 0; c < COLS; c++) {
+                state[r][c] = AVAILABLE;
+            }
+        }
+    }
+
     private void initDefaultTaken() {
         // TAKEN_X  → red ×
         String[] takenX = {
             "A7","A8","A9",  "A11","A12","A13",
             "B7","B8",       "B11","B12","B13"
         };
-        // TAKEN_BOX → dark seat (no ×), aisle‑side gaps already handled by aisle
-        // From the screenshot rows D col 9 area appears as gap (aisle), rest available.
-        // We'll just mark the X ones; everything else starts AVAILABLE.
         for (String s : takenX) {
             int[] idx = seatKey(s);
             if (idx != null) state[idx[0]][idx[1]] = TAKEN_X;
@@ -354,6 +375,34 @@ public class SeatSelectionPanel extends JPanel {
     /** Return a snapshot of currently selected seats. */
     public List<String> getSelectedSeats() {
         return Collections.unmodifiableList(selectedSeats);
+    }
+
+    public void setTakenSeats(java.util.List<String> takenSeats) {
+        selectedSeats.clear();
+        initTakenSeats(takenSeats);
+        removeAll();
+        buildUI();
+        revalidate();
+        repaint();
+        refreshTotal();
+    }
+
+    public static java.util.List<String> generatePseudoTakenSeats(String key) {
+        java.util.List<String> seats = new ArrayList<>();
+        if (key == null || key.isEmpty()) return seats;
+        java.util.List<String> all = new ArrayList<>();
+        for (char row : ROWS) {
+            for (int col = 1; col <= COLS; col++) {
+                all.add("" + row + col);
+            }
+        }
+        java.util.Random rand = new java.util.Random(key.hashCode());
+        java.util.Collections.shuffle(all, rand);
+        int count = 8 + Math.abs(key.hashCode()) % 12;
+        for (int i = 0; i < count && i < all.size(); i++) {
+            seats.add(all.get(i));
+        }
+        return seats;
     }
 
     /** Clear all selections (called on Reset). */
