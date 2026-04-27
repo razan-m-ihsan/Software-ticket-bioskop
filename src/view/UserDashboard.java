@@ -104,7 +104,8 @@ public class UserDashboard extends JFrame {
         setMinimumSize(new Dimension(900, 700));
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setResizable(false);
+        setResizable(true);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
 
         JPanel root = new JPanel(new BorderLayout());
         root.setBackground(new Color(40, 40, 40));

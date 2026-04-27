@@ -1,10 +1,9 @@
 package view;
 
 import dao.UserDAO;
-import model.User;
-
-import javax.swing.*;
 import java.awt.*;
+import javax.swing.*;
+import model.User;
 
 public class LoginForm extends JFrame {
 
@@ -17,6 +16,7 @@ public class LoginForm extends JFrame {
         setMinimumSize(new Dimension(700, 480));
         setResizable(true);
         setLocationRelativeTo(null);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         // ===== MAIN PANEL (GRADIENT BACKGROUND) =====

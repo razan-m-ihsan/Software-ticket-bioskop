@@ -1,7 +1,7 @@
 package view;
 
-import javax.swing.*;
 import java.awt.*;
+import javax.swing.*;
 
 public class AdminDashboard extends JFrame {
 
@@ -82,5 +82,7 @@ public class AdminDashboard extends JFrame {
         });
 
         add(panel);
+        setResizable(true);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
     }
 }

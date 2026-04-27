@@ -37,6 +37,7 @@ public class PaymentPageFrame extends JFrame {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setResizable(true);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
 
         JPanel root = new JPanel(new BorderLayout());
         root.setBackground(new Color(40, 40, 40));
@@ -348,6 +349,7 @@ public class PaymentPageFrame extends JFrame {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(true);
         frame.setMinimumSize(new Dimension(620, 340));
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 
         JPanel root = new JPanel(new BorderLayout());
         root.setBackground(new Color(30, 30, 30));
