@@ -1,15 +1,17 @@
 package view;
 
 import config.DatabaseConnection;
-import model.Promo;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
 import java.net.URL;
 import java.sql.*;
 import java.util.*;
 import java.util.List;
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.*;
+import model.Promo;
 
 public class UserDashboard extends JFrame {
 
@@ -1001,17 +1003,59 @@ public class UserDashboard extends JFrame {
 
     private void loadPoster(int idx) {
         if (idx < 0 || idx >= filmPosters.size()) return;
-        String url = filmPosters.get(idx);
-        if (url == null || url.isEmpty()) { lblPoster.setIcon(null); return; }
+        String posterPath = filmPosters.get(idx);
+        if (posterPath == null || posterPath.isEmpty()) { lblPoster.setIcon(null); return; }
         new Thread(() -> {
-            try {
-                ImageIcon ic = new ImageIcon(new URL(url));
-                Image sc = ic.getImage().getScaledInstance(115, 155, Image.SCALE_SMOOTH);
-                SwingUtilities.invokeLater(() -> lblPoster.setIcon(new ImageIcon(sc)));
-            } catch (Exception ex) {
-                SwingUtilities.invokeLater(() -> lblPoster.setIcon(null));
-            }
+            ImageIcon icon = loadPosterIcon(posterPath, 115, 155);
+            SwingUtilities.invokeLater(() -> lblPoster.setIcon(icon));
         }).start();
+    }
+
+    private ImageIcon loadPosterIcon(String path, int width, int height) {
+        if (path == null || path.isEmpty()) return null;
+        try {
+            if (path.startsWith("http://") || path.startsWith("https://")) {
+                ImageIcon ic = new ImageIcon(new URL(path));
+                return new ImageIcon(ic.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH));
+            }
+
+            String normalized = path.startsWith("/") ? path.substring(1) : path;
+            URL resource = getClass().getResource("/" + normalized);
+            if (resource != null) {
+                ImageIcon ic = new ImageIcon(resource);
+                return new ImageIcon(ic.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH));
+            }
+
+            File file = new File(path);
+            if (!file.exists()) {
+                String relative = normalized.startsWith("assets/") ? normalized.substring(7) : normalized;
+                file = new File("src/assets", relative);
+            }
+
+            if (file.exists()) {
+                Image image = ImageIO.read(file);
+                return new ImageIcon(image.getScaledInstance(width, height, Image.SCALE_SMOOTH));
+            }
+        } catch (Exception ex) {
+            // ignore and return no icon
+        }
+        return null;
+    }
+
+    private String getLocalPosterPathForTitle(String title) {
+        if (title == null) return "";
+        switch (title.trim()) {
+            case "Avengers":
+                return "assets/avengers.jpg";
+            case "El Camino: A Breaking Bad Movie":
+                return "assets/el_camino.jpg";
+            case "AMBALANGKUNG THE MOVIE":
+                return "assets/ambalangkung.jpg";
+            case "Project Hail Mary":
+                return "assets/project_hail_mary.jpg";
+            default:
+                return "";
+        }
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -1023,9 +1067,14 @@ public class UserDashboard extends JFrame {
             ResultSet  rs   = conn.createStatement().executeQuery("SELECT * FROM movies");
             while (rs.next()) {
                 filmIds.add(rs.getInt("id"));
-                listModel.addElement(rs.getString("judul"));
-                try { filmPosters.add(rs.getString("poster_url")); }
-                catch (Exception ex) { filmPosters.add(""); }
+                String title = rs.getString("judul");
+                listModel.addElement(title);
+                String posterPath = "";
+                try { posterPath = rs.getString("poster_url"); } catch (Exception ex) { /* fallback to local assets */ }
+                if (posterPath == null || posterPath.isEmpty()) {
+                    posterPath = getLocalPosterPathForTitle(title);
+                }
+                filmPosters.add(posterPath);
             }
         } catch (Exception e) { e.printStackTrace(); }
     }
@@ -1075,13 +1124,12 @@ public class UserDashboard extends JFrame {
             thumb.setOpaque(true);
 
             if (index < filmPosters.size()) {
-                String url = filmPosters.get(index);
-                if (url != null && !url.isEmpty()) {
-                    try {
-                        ImageIcon ic = new ImageIcon(new URL(url));
-                        thumb.setIcon(new ImageIcon(
-                                ic.getImage().getScaledInstance(44, 64, Image.SCALE_SMOOTH)));
-                    } catch (Exception ex) { /* no poster */ }
+                String posterPath = filmPosters.get(index);
+                if (posterPath != null && !posterPath.isEmpty()) {
+                    ImageIcon ic = loadPosterIcon(posterPath, 44, 64);
+                    if (ic != null) {
+                        thumb.setIcon(ic);
+                    }
                 }
             }
 
