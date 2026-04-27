@@ -3,11 +3,13 @@ package view;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import util.QRCodeGenerator;
 
 public class PaymentPageFrame extends JFrame {
 
@@ -341,11 +343,11 @@ public class PaymentPageFrame extends JFrame {
     // ── Payment Success Screen ────────────────────────────────────────────────
     private void showPaymentSuccessScreen(int userId, long finalTotal) {
         JFrame frame = new JFrame("Pembayaran Berhasil");
-        frame.setSize(480, 400);
+        frame.setSize(740, 420);
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(true);
-        frame.setMinimumSize(new Dimension(400, 340));
+        frame.setMinimumSize(new Dimension(620, 340));
 
         JPanel root = new JPanel(new BorderLayout());
         root.setBackground(new Color(30, 30, 30));
@@ -408,7 +410,32 @@ public class PaymentPageFrame extends JFrame {
         centre.add(Box.createVerticalStrut(6));
         centre.add(subLbl);
         centre.add(Box.createVerticalStrut(24));
-        centre.add(detailCard);
+
+        JPanel contentRow = new JPanel(new BorderLayout(20, 0));
+        contentRow.setOpaque(false);
+
+        detailCard.setMaximumSize(new Dimension(420, 140));
+        contentRow.add(detailCard, BorderLayout.CENTER);
+
+        BufferedImage qr = QRCodeGenerator.generateQR(
+                "CineTix\nPayment: " + selectedMethod + "\nTotal: " + formatRp(finalTotal));
+        if (qr != null) {
+            JLabel qrLabel = new JLabel(new ImageIcon(qr));
+            qrLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            qrLabel.setBorder(new EmptyBorder(10, 10, 10, 10));
+
+            JPanel qrWrapper = new JPanel(new BorderLayout());
+            qrWrapper.setOpaque(false);
+            qrWrapper.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(new Color(60, 60, 60)),
+                    new EmptyBorder(12, 12, 12, 12)));
+            qrWrapper.add(qrLabel, BorderLayout.CENTER);
+            qrWrapper.add(new JLabel("Tunjukkan QR ini ke kasir", SwingConstants.CENTER), BorderLayout.SOUTH);
+
+            contentRow.add(qrWrapper, BorderLayout.EAST);
+        }
+
+        centre.add(contentRow);
         centre.add(Box.createVerticalStrut(28));
         centre.add(btnHome);
 
