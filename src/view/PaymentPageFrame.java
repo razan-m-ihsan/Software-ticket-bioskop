@@ -134,6 +134,7 @@ public class PaymentPageFrame extends JFrame {
             dispose();
             showPaymentSuccessScreen(userId, finalTotal);
         });
+        getRootPane().setDefaultButton(btnPay);
 
         JLabel lblLogout = new JLabel("Log out", SwingConstants.CENTER);
         lblLogout.setForeground(new Color(100, 160, 255));

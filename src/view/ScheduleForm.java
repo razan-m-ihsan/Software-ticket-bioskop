@@ -1,13 +1,12 @@
 package view;
 
-import dao.ScheduleDAO;
 import config.DatabaseConnection;
-
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
+import dao.ScheduleDAO;
 import java.awt.*;
 import java.sql.*;
 import java.util.ArrayList;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 
 public class ScheduleForm extends JFrame {
 
@@ -82,6 +81,7 @@ public class ScheduleForm extends JFrame {
         panel.add(contentPanel, BorderLayout.CENTER);
 
         add(panel);
+        getRootPane().setDefaultButton(btnTambah);
 
         loadFilm();
         loadStudio();

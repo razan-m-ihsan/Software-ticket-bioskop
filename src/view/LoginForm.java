@@ -67,6 +67,7 @@ public class LoginForm extends JFrame {
         btnLogin.setForeground(Color.YELLOW);
 
         btnLogin.addActionListener(e -> loginAction());
+        getRootPane().setDefaultButton(btnLogin);
 
         // ===== LINK REGISTER =====
         JLabel registerLink = new JLabel("Don't have an account? Register");

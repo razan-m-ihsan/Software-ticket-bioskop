@@ -1,12 +1,11 @@
 package view;
 
 import dao.MovieDAO;
-import model.Movie;
-
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import model.Movie;
 
 public class MovieForm extends JFrame {
 
@@ -99,6 +98,7 @@ public class MovieForm extends JFrame {
         panel.add(contentPanel, BorderLayout.CENTER);
 
         add(panel);
+        getRootPane().setDefaultButton(btnTambah);
 
         loadTable();
 

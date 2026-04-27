@@ -1,12 +1,11 @@
 package view;
 
 import dao.PromoDAO;
-import model.Promo;
-
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import model.Promo;
 
 public class PromoForm extends JFrame {
 
@@ -138,6 +137,7 @@ public class PromoForm extends JFrame {
 
         mainPanel.add(panel, BorderLayout.CENTER);
         add(mainPanel);
+        getRootPane().setDefaultButton(btnTambah);
 
         // LOAD DATA
         loadTable();

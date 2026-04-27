@@ -1,10 +1,9 @@
 package view;
 
 import dao.UserDAO;
-import model.User;
-
-import javax.swing.*;
 import java.awt.*;
+import javax.swing.*;
+import model.User;
 
 public class RegisterForm extends JFrame {
 
@@ -71,6 +70,7 @@ public class RegisterForm extends JFrame {
         btnRegister.setForeground(Color.YELLOW);
 
         btnRegister.addActionListener(e -> registerAction());
+        getRootPane().setDefaultButton(btnRegister);
 
         // ===== LINK LOGIN =====
         JLabel loginLink = new JLabel("Already have an account? Login");
