@@ -1,88 +1,78 @@
 package view;
 
-import java.awt.*;
 import javax.swing.*;
+import java.awt.*;
 
 public class AdminDashboard extends JFrame {
 
     public AdminDashboard() {
         setTitle("Admin Dashboard - CinemaTix");
-        setSize(500, 520);
-        setLocationRelativeTo(null);
+        setMinimumSize(new Dimension(400, 300));
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
 
         // PANEL UTAMA
-        JPanel panel = new JPanel();
-        panel.setLayout(null);
-        panel.setBackground(new Color(30, 30, 30)); // dark mode
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBackground(new Color(30, 30, 30));
+
+        JPanel inner = new JPanel();
+        inner.setLayout(new BoxLayout(inner, BoxLayout.Y_AXIS));
+        inner.setOpaque(false);
 
         // TITLE
-        JLabel title = new JLabel("ADMIN DASHBOARD");
-        title.setBounds(130, 30, 300, 40);
-        title.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        JLabel title = new JLabel("ADMIN DASHBOARD", SwingConstants.CENTER);
+        title.setFont(new Font("Segoe UI", Font.BOLD, 28));
         title.setForeground(Color.WHITE);
-        panel.add(title);
+        title.setAlignmentX(Component.CENTER_ALIGNMENT);
+        inner.add(title);
+        inner.add(Box.createVerticalStrut(40));
 
-        // ===== BUTTON KELOLA FILM =====
-        JButton btnFilm = new JButton("Kelola Film");
-        btnFilm.setBounds(150, 120, 200, 40);
-        btnFilm.setBackground(new Color(52, 152, 219));
-        btnFilm.setForeground(Color.WHITE);
-        btnFilm.setFocusPainted(false);
-        btnFilm.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        panel.add(btnFilm);
+        // ===== BUTTONS =====
+        JButton btnFilm   = createAdminButton("Kelola Film",   new Color(52, 152, 219));
+        JButton btnJadwal = createAdminButton("Kelola Jadwal", new Color(46, 204, 113));
+        JButton btnPromo  = createAdminButton("Kelola Promo",  new Color(155, 89, 182));
+        JButton btnLogout = createAdminButton("Logout",        new Color(231, 76, 60));
 
-        // ===== BUTTON KELOLA JADWAL =====
-        JButton btnJadwal = new JButton("Kelola Jadwal");
-        btnJadwal.setBounds(150, 180, 200, 40);
-        btnJadwal.setBackground(new Color(46, 204, 113));
-        btnJadwal.setForeground(Color.WHITE);
-        btnJadwal.setFocusPainted(false);
-        btnJadwal.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        panel.add(btnJadwal);
+        inner.add(btnFilm);   inner.add(Box.createVerticalStrut(16));
+        inner.add(btnJadwal); inner.add(Box.createVerticalStrut(16));
+        inner.add(btnPromo);  inner.add(Box.createVerticalStrut(16));
+        inner.add(btnLogout);
 
-        // Tambahkan setelah btnJadwal
-        JButton btnPromo = new JButton("Kelola Promo");
-        btnPromo.setBounds(150, 240, 200, 40);
-        btnPromo.setBackground(new Color(155, 89, 182));
-        btnPromo.setForeground(Color.WHITE);
-        btnPromo.setFocusPainted(false);
-        btnPromo.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        panel.add(btnPromo);
+        panel.add(inner);
+        add(panel);
 
-        // Geser btnLogout ke bawah: setBounds(150, 300, 200, 40)
-
-        // Event
-        btnPromo.addActionListener(e -> new PromoForm().setVisible(true));
-        JButton btnLogout = new JButton("Logout");
-        btnLogout.setBounds(150, 300, 200, 40);
-        btnLogout.setBackground(new Color(231, 76, 60));
-        btnLogout.setForeground(Color.WHITE);
-        btnLogout.setFocusPainted(false);
-        btnLogout.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        panel.add(btnLogout);
-
-        // ===== EVENT =====
+        // ===== EVENTS =====
         btnFilm.addActionListener(e -> {
-            new MovieForm().setVisible(true);
+            setVisible(false);
+            new MovieForm(this).setVisible(true);
         });
 
         btnJadwal.addActionListener(e -> {
-            new ScheduleForm().setVisible(true);
+            setVisible(false);
+            new ScheduleForm(this).setVisible(true);
         });
 
         btnPromo.addActionListener(e -> {
-            dispose();
-            new PromoForm().setVisible(true);
+            setVisible(false);
+            new PromoForm(this).setVisible(true);
         });
 
         btnLogout.addActionListener(e -> {
             dispose();
             new LoginForm().setVisible(true);
         });
+    }
 
-        add(panel);
-        setResizable(true);
-        setExtendedState(JFrame.MAXIMIZED_BOTH);
+    private JButton createAdminButton(String text, Color bg) {
+        JButton btn = new JButton(text);
+        btn.setPreferredSize(new Dimension(240, 48));
+        btn.setMaximumSize(new Dimension(240, 48));
+        btn.setBackground(bg);
+        btn.setForeground(Color.WHITE);
+        btn.setFocusPainted(false);
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        btn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        return btn;
     }
 }

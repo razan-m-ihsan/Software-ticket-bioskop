@@ -32,9 +32,7 @@ public class PaymentPageFrame extends JFrame {
         UserDashboard.RestoredState restoredState   // ← NEW
     ) {
         setTitle("CineTix - Payment Page");
-        setSize(900, 780);
         setMinimumSize(new Dimension(720, 640));
-        setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setResizable(true);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -344,8 +342,6 @@ public class PaymentPageFrame extends JFrame {
     // ── Payment Success Screen ────────────────────────────────────────────────
     private void showPaymentSuccessScreen(int userId, long finalTotal) {
         JFrame frame = new JFrame("Pembayaran Berhasil");
-        frame.setSize(740, 420);
-        frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(true);
         frame.setMinimumSize(new Dimension(620, 340));

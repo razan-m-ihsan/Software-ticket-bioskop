@@ -18,13 +18,12 @@ public class MovieForm extends JFrame {
     private MovieDAO dao = new MovieDAO();
     private int selectedId = -1;
 
-    public MovieForm() {
+    public MovieForm(AdminDashboard adminDashboard) {
         setTitle("Manajemen Film - CinemaTix");
-        setSize(800, 520);
         setMinimumSize(new Dimension(650, 420));
         setResizable(true);
-        setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
 
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(new Color(245, 245, 245));
@@ -42,7 +41,7 @@ public class MovieForm extends JFrame {
         btnBack.setPreferredSize(new Dimension(100, 30));
         btnBack.addActionListener(e -> {
             dispose();
-            new AdminDashboard().setVisible(true);
+            adminDashboard.setVisible(true);
         });
         headerPanel.add(btnBack, BorderLayout.WEST);
         panel.add(headerPanel, BorderLayout.NORTH);

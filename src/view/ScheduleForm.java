@@ -21,13 +21,12 @@ public class ScheduleForm extends JFrame {
 
     private ScheduleDAO dao = new ScheduleDAO();
 
-    public ScheduleForm() {
+    public ScheduleForm(AdminDashboard adminDashboard) {
         setTitle("Manajemen Jadwal - CinemaTix");
-        setSize(900, 540);
         setMinimumSize(new Dimension(700, 440));
         setResizable(true);
-        setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
 
         JPanel panel = new JPanel(new BorderLayout());
 
@@ -44,7 +43,7 @@ public class ScheduleForm extends JFrame {
         btnBack.setPreferredSize(new Dimension(100, 30));
         btnBack.addActionListener(e -> {
             dispose();
-            new AdminDashboard().setVisible(true);
+            adminDashboard.setVisible(true);
         });
         headerPanel.add(btnBack, BorderLayout.WEST);
         panel.add(headerPanel, BorderLayout.NORTH);

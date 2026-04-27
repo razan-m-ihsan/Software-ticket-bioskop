@@ -19,13 +19,12 @@ public class PromoForm extends JFrame {
     private PromoDAO dao = new PromoDAO();
     private int selectedId = -1;
 
-    public PromoForm() {
+    public PromoForm(AdminDashboard adminDashboard) {
         setTitle("Manajemen Promo - CinemaTix");
-        setSize(900, 580);
         setMinimumSize(new Dimension(700, 460));
         setResizable(true);
-        setLocationRelativeTo(null);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
 
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBackground(new Color(245, 245, 245));
@@ -43,7 +42,7 @@ public class PromoForm extends JFrame {
         btnBack.setPreferredSize(new Dimension(100, 30));
         btnBack.addActionListener(e -> {
             dispose();
-            new AdminDashboard().setVisible(true);  // ← add .setVisible(true)
+            adminDashboard.setVisible(true);
         });
         headerPanel.add(btnBack, BorderLayout.WEST);
         mainPanel.add(headerPanel, BorderLayout.NORTH);
@@ -276,7 +275,5 @@ public class PromoForm extends JFrame {
         table.clearSelection();
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new PromoForm().setVisible(true));
-    }
+
 }

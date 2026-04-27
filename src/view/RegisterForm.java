@@ -19,6 +19,7 @@ public class RegisterForm extends JFrame {
         setResizable(true);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
 
         // ===== MAIN PANEL (GRADIENT BACKGROUND) =====
         JPanel mainPanel = new JPanel() {
