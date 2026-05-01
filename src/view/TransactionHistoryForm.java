@@ -17,7 +17,7 @@ public class TransactionHistoryForm extends JFrame {
         setResizable(true);
         setLocationRelativeTo(null);
 
-        String[] kolom = {"Film", "Kursi", "Harga", "Waktu"};
+        String[] kolom = {"Film", "Kursi", "Metode", "Harga", "Status", "Waktu"};
         DefaultTableModel model = new DefaultTableModel(kolom, 0);
         JTable table = new JTable(model);
 
@@ -25,11 +25,12 @@ public class TransactionHistoryForm extends JFrame {
             Connection conn = DatabaseConnection.getConnection();
 
             PreparedStatement ps = conn.prepareStatement(
-                    "SELECT m.judul,t.nomor_kursi,t.total_harga,t.waktu_transaksi " +
+                    "SELECT m.judul, t.nomor_kursi, t.metode_pembayaran, t.total_harga, t.status, t.waktu_transaksi " +
                     "FROM transactions t " +
                     "JOIN schedules s ON t.schedule_id=s.id " +
                     "JOIN movies m ON s.movie_id=m.id " +
-                    "WHERE t.user_id=?"
+                    "WHERE t.user_id=? " +
+                    "ORDER BY t.waktu_transaksi DESC"
             );
 
             ps.setInt(1, userId);
@@ -40,8 +41,10 @@ public class TransactionHistoryForm extends JFrame {
                 model.addRow(new Object[]{
                         rs.getString(1),
                         rs.getString(2),
-                        rs.getDouble(3),
-                        rs.getString(4)
+                        rs.getString(3),
+                        rs.getDouble(4),
+                        rs.getString(5),
+                        rs.getString(6)
                 });
             }
 

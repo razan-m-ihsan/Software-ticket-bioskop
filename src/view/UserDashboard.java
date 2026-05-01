@@ -425,8 +425,19 @@ public class UserDashboard extends JFrame {
             }
         });
 
-        JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JButton btnHistory = new JButton("Riwayat Pembayaran");
+        btnHistory.setBackground(new Color(90, 90, 90));
+        btnHistory.setForeground(Color.WHITE);
+        btnHistory.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        btnHistory.setFocusPainted(false);
+        btnHistory.setPreferredSize(new Dimension(180, 40));
+        btnHistory.setBorder(BorderFactory.createLineBorder(new Color(120, 120, 120), 1));
+        btnHistory.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btnHistory.addActionListener(e -> new TransactionHistoryForm(userId).setVisible(true));
+
+        JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 0));
         btnRow.setBackground(new Color(42, 42, 42));
+        btnRow.add(btnHistory);
         btnRow.add(btnConfirm);
 
         bottom.add(btnRow,    BorderLayout.CENTER);
@@ -908,6 +919,7 @@ public class UserDashboard extends JFrame {
                 new ArrayList<>(selectedSeats),
                 foodSummary,
                 subtotal,
+                seatTotal,
                 promoValue,
                 finalTotal,
                 snapshot   // ← NEW

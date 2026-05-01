@@ -4,11 +4,14 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import config.DatabaseConnection;
 import util.QRCodeGenerator;
 
 public class PaymentPageFrame extends JFrame {
@@ -27,6 +30,7 @@ public class PaymentPageFrame extends JFrame {
         List<String> seats,
         String foodSummary,
         long subtotal,
+        long seatTotal,
         long promoValue,
         long finalTotal,
         UserDashboard.RestoredState restoredState   // ← NEW
@@ -44,7 +48,7 @@ public class PaymentPageFrame extends JFrame {
 
         root.add(buildPaymentPanel(
                 userId, filmTitle, studio, jamTayang, seats,
-                foodSummary, subtotal, promoValue, finalTotal,
+                foodSummary, subtotal, seatTotal, promoValue, finalTotal,
                 restoredState),   // ← NEW
                 BorderLayout.CENTER);
     }
@@ -59,6 +63,7 @@ public class PaymentPageFrame extends JFrame {
             List<String> seats,
             String foodSummary,
             long subtotal,
+            long seatTotal,
             long promoValue,
             long finalTotal,
             UserDashboard.RestoredState restoredState   // ← NEW
@@ -131,6 +136,7 @@ public class PaymentPageFrame extends JFrame {
         btnPay.setBorder(BorderFactory.createLineBorder(new Color(210, 165, 0), 2));
         btnPay.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btnPay.addActionListener(e -> {
+            saveTransactions(userId, filmTitle, studio, jamTayang, seats, selectedMethod, seatTotal);
             dispose();
             showPaymentSuccessScreen(userId, finalTotal);
         });
@@ -453,6 +459,125 @@ public class PaymentPageFrame extends JFrame {
         lbl.setForeground(color);
         lbl.setFont(new Font("Krona One", Font.BOLD, 13));
         return lbl;
+    }
+
+    private void saveTransactions(int userId, String filmTitle, String studio, String jamTayang,
+                                  List<String> seats, String paymentMethod, long seatTotal) {
+        if (seats == null || seats.isEmpty()) return;
+
+        double seatPrice = (double) seatTotal / seats.size();
+        int scheduleId = findOrCreateScheduleId(filmTitle, studio, jamTayang, seatPrice);
+        if (scheduleId <= 0) {
+            System.err.println("Schedule not found and could not be created for transaction history.");
+            return;
+        }
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(
+                     "INSERT INTO transactions(user_id,schedule_id,nomor_kursi,total_harga,metode_pembayaran,status) VALUES(?,?,?,?,?,?)")) {
+
+            for (String seat : seats) {
+                ps.setInt(1, userId);
+                ps.setInt(2, scheduleId);
+                ps.setString(3, seat);
+                ps.setDouble(4, seatPrice);
+                ps.setString(5, paymentMethod);
+                ps.setString(6, "Success");
+                ps.executeUpdate();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private int findOrCreateScheduleId(String movieTitle, String studioLabel, String jamTayang, double price) {
+        int scheduleId = findScheduleId(movieTitle, studioLabel, jamTayang);
+        if (scheduleId > 0) return scheduleId;
+
+        int movieId = findMovieId(movieTitle);
+        int studioId = findStudioId(getStudioNameFromLabel(studioLabel));
+        if (movieId <= 0 || studioId <= 0) return -1;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(
+                     "INSERT INTO schedules(movie_id, studio_id, tanggal_tayang, jam_tayang, harga) VALUES(?,?,?,?,?)",
+                     Statement.RETURN_GENERATED_KEYS)) {
+            ps.setInt(1, movieId);
+            ps.setInt(2, studioId);
+            ps.setDate(3, Date.valueOf(LocalDate.now()));
+            ps.setString(4, normalizeTimeForDb(jamTayang));
+            ps.setDouble(5, price);
+            ps.executeUpdate();
+
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    private int findMovieId(String movieTitle) {
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement("SELECT id FROM movies WHERE judul = ? LIMIT 1")) {
+            ps.setString(1, movieTitle);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt("id");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    private int findStudioId(String studioName) {
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement("SELECT id FROM studios WHERE nama_studio = ? LIMIT 1")) {
+            ps.setString(1, studioName);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt("id");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    private int findScheduleId(String movieTitle, String studioLabel, String jamTayang) {
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            String query = "SELECT s.id FROM schedules s " +
+                    "JOIN movies m ON s.movie_id = m.id " +
+                    "JOIN studios st ON s.studio_id = st.id " +
+                    "WHERE m.judul = ? AND st.nama_studio = ? AND s.jam_tayang = ? LIMIT 1";
+            try (PreparedStatement ps = conn.prepareStatement(query)) {
+                ps.setString(1, movieTitle);
+                ps.setString(2, getStudioNameFromLabel(studioLabel));
+                ps.setString(3, normalizeTimeForDb(jamTayang));
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) return rs.getInt("id");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    private String getStudioNameFromLabel(String label) {
+        if (label == null) return "";
+        if (label.contains("Reguler 2D")) return "Reguler 2D";
+        if (label.contains("Reguler 3D")) return "Reguler 3D";
+        if (label.contains("Premium")) return "Premium";
+        if (label.contains("IMAX")) return "IMAX";
+        return label;
+    }
+
+    private String normalizeTimeForDb(String jam) {
+        if (jam == null || jam.isEmpty()) return "";
+        String normalized = jam.replace('.', ':').trim();
+        if (normalized.length() == 5) normalized += ":00";
+        return normalized;
     }
 
 }
