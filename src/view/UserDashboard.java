@@ -22,6 +22,7 @@ public class UserDashboard extends JFrame {
     private JList<String>            filmList    = new JList<>(listModel);
     private ArrayList<Integer>       filmIds     = new ArrayList<>();
     private ArrayList<String>        filmPosters = new ArrayList<>();
+    private String                   currentPosterPreviewPath = "";
 
     // ── Detail fields ──────────────────────────────────────────────────────────
     private JTextField txtJudul       = new JTextField();
@@ -266,6 +267,15 @@ public class UserDashboard extends JFrame {
         lblPoster.setOpaque(true);
         lblPoster.setBorder(BorderFactory.createLineBorder(new Color(68, 68, 68)));
         lblPoster.setHorizontalAlignment(SwingConstants.CENTER);
+        lblPoster.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        lblPoster.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (currentPosterPreviewPath != null && !currentPosterPreviewPath.isEmpty()) {
+                    showPosterZoom(currentPosterPreviewPath);
+                }
+            }
+        });
 
         posterBox.add(posterTitle, BorderLayout.NORTH);
         posterBox.add(lblPoster,   BorderLayout.CENTER);
@@ -1109,11 +1119,65 @@ public class UserDashboard extends JFrame {
     private void loadPoster(int idx) {
         if (idx < 0 || idx >= filmPosters.size()) return;
         String posterPath = filmPosters.get(idx);
-        if (posterPath == null || posterPath.isEmpty()) { lblPoster.setIcon(null); return; }
+        if (posterPath == null || posterPath.isEmpty()) {
+            currentPosterPreviewPath = "";
+            lblPoster.setIcon(null);
+            return;
+        }
+        currentPosterPreviewPath = posterPath;
         new Thread(() -> {
             ImageIcon icon = loadPosterIcon(posterPath, 115, 155);
             SwingUtilities.invokeLater(() -> lblPoster.setIcon(icon));
         }).start();
+    }
+
+    private void showPosterZoom(String posterPath) {
+        JDialog zoomDialog = new JDialog(this, "Poster", true);
+        zoomDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        zoomDialog.setSize(420, 580);
+        zoomDialog.setLocationRelativeTo(this);
+
+        JPanel root = new JPanel(new BorderLayout());
+        root.setBackground(new Color(25, 25, 25));
+        root.setBorder(new EmptyBorder(16, 16, 16, 16));
+
+        JLabel zoomLabel = new JLabel();
+        zoomLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        zoomLabel.setVerticalAlignment(SwingConstants.CENTER);
+        zoomLabel.setBorder(BorderFactory.createLineBorder(new Color(100, 100, 100), 2));
+
+        ImageIcon zoomIcon = loadPosterIcon(posterPath, 360, 520);
+        if (zoomIcon != null) {
+            zoomLabel.setIcon(zoomIcon);
+        } else {
+            zoomLabel.setText("No Image");
+            zoomLabel.setForeground(new Color(220, 220, 220));
+            zoomLabel.setFont(new Font("Segoe UI", Font.PLAIN, 18));
+        }
+
+        JPanel info = new JPanel(new BorderLayout());
+        info.setOpaque(false);
+        info.setBorder(new EmptyBorder(12, 0, 0, 0));
+
+        JLabel note = new JLabel("Klik Tutup untuk kembali");
+        note.setForeground(new Color(210, 210, 210));
+        note.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        note.setHorizontalAlignment(SwingConstants.CENTER);
+        info.add(note, BorderLayout.CENTER);
+
+        JButton btnClose = new JButton("Tutup");
+        btnClose.setBackground(new Color(60, 60, 60));
+        btnClose.setForeground(Color.WHITE);
+        btnClose.setFocusPainted(false);
+        btnClose.setBorder(BorderFactory.createLineBorder(new Color(120, 120, 120)));
+        btnClose.addActionListener(e -> zoomDialog.dispose());
+        info.add(btnClose, BorderLayout.SOUTH);
+
+        root.add(zoomLabel, BorderLayout.CENTER);
+        root.add(info, BorderLayout.SOUTH);
+
+        zoomDialog.setContentPane(root);
+        zoomDialog.setVisible(true);
     }
 
     private ImageIcon loadPosterIcon(String path, int width, int height) {
