@@ -1,11 +1,10 @@
 package dao;
 
 import config.DatabaseConnection;
-import model.Movie;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import model.Movie;
 
 public class MovieDAO {
 
@@ -13,7 +12,7 @@ public class MovieDAO {
     public void insert(Movie movie) {
         try {
             Connection conn = DatabaseConnection.getConnection();
-            String query = "INSERT INTO movies (judul, sinopsis, durasi, genre, rating_usia) VALUES (?, ?, ?, ?, ?)";
+            String query = "INSERT INTO movies (judul, sinopsis, durasi, genre, rating_usia, poster_url) VALUES (?, ?, ?, ?, ?, ?)";
             PreparedStatement ps = conn.prepareStatement(query);
 
             ps.setString(1, movie.getJudul());
@@ -21,6 +20,7 @@ public class MovieDAO {
             ps.setInt(3, movie.getDurasi());
             ps.setString(4, movie.getGenre());
             ps.setString(5, movie.getRatingUsia());
+            ps.setString(6, movie.getPosterUrl());
 
             ps.executeUpdate();
         } catch (Exception e) {
@@ -45,7 +45,8 @@ public class MovieDAO {
                         rs.getString("sinopsis"),
                         rs.getInt("durasi"),
                         rs.getString("genre"),
-                        rs.getString("rating_usia")
+                        rs.getString("rating_usia"),
+                        rs.getString("poster_url")
                 );
                 list.add(m);
             }
@@ -61,7 +62,7 @@ public class MovieDAO {
     public void update(Movie movie) {
         try {
             Connection conn = DatabaseConnection.getConnection();
-            String query = "UPDATE movies SET judul=?, sinopsis=?, durasi=?, genre=?, rating_usia=? WHERE id=?";
+            String query = "UPDATE movies SET judul=?, sinopsis=?, durasi=?, genre=?, rating_usia=?, poster_url=? WHERE id=?";
             PreparedStatement ps = conn.prepareStatement(query);
 
             ps.setString(1, movie.getJudul());
@@ -69,7 +70,8 @@ public class MovieDAO {
             ps.setInt(3, movie.getDurasi());
             ps.setString(4, movie.getGenre());
             ps.setString(5, movie.getRatingUsia());
-            ps.setInt(6, movie.getId());
+            ps.setString(6, movie.getPosterUrl());
+            ps.setInt(7, movie.getId());
 
             ps.executeUpdate();
         } catch (Exception e) {

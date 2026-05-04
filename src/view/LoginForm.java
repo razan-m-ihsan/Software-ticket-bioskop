@@ -44,10 +44,10 @@ public class LoginForm extends JFrame {
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
 
         // ===== TITLE =====
-        JLabel title = new JLabel("🎬 CineTix");
+        JLabel title = new JLabel("CineTix");
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
         title.setForeground(Color.WHITE);
-        title.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        title.setFont(new Font("Segoe UI", Font.BOLD, 30));
 
         JLabel subtitle = new JLabel("Login to your account");
         subtitle.setAlignmentX(Component.CENTER_ALIGNMENT);

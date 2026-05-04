@@ -236,11 +236,18 @@ public class TransactionHistoryForm extends JFrame {
         details.setOpaque(false);
         details.setLayout(new BoxLayout(details, BoxLayout.Y_AXIS));
 
-        JLabel titleLabel = new JLabel(title);
-        titleLabel.setForeground(Color.WHITE);
-        titleLabel.setFont(new Font("Krona One", Font.BOLD, 28));
-        titleLabel.setBorder(new EmptyBorder(0, 0, 18, 0));
-        details.add(titleLabel);
+        JTextArea titleArea = new JTextArea(title);
+        titleArea.setOpaque(false);
+        titleArea.setForeground(Color.WHITE);
+        titleArea.setFont(new Font("Krona One", Font.BOLD, 25));
+        titleArea.setLineWrap(true);
+        titleArea.setWrapStyleWord(true);
+        titleArea.setEditable(false);
+        titleArea.setFocusable(false);
+        titleArea.setBorder(new EmptyBorder(0, 0, 18, 0));
+        titleArea.setMaximumSize(new Dimension(520, 80));
+        titleArea.setAlignmentX(Component.LEFT_ALIGNMENT);
+        details.add(titleArea);
 
         details.add(createInfoRow("Tanggal", formatDate(tanggal) + "  " + jam));
         details.add(createInfoRow("Kursi", kursi));
@@ -253,10 +260,11 @@ public class TransactionHistoryForm extends JFrame {
         spacer.setPreferredSize(new Dimension(0, 24));
         details.add(spacer);
 
-        JLabel note = new JLabel("Terima kasih telah menggunakan CineTix. Nikmati filmmu!");
-        note.setForeground(new Color(210, 210, 190));
+        JLabel note = new JLabel("<html>Terima kasih telah menggunakan CineTix.<br>Enjoy your movie!</html>");
+        note.setForeground(Color.WHITE);
         note.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         note.setBorder(new EmptyBorder(18, 0, 0, 0));
+        note.setMaximumSize(new Dimension(320, Integer.MAX_VALUE));
         details.add(note);
 
         card.add(details, BorderLayout.CENTER);

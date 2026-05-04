@@ -34,6 +34,15 @@ public class UserDashboard extends JFrame {
 
     // ── Poster preview ─────────────────────────────────────────────────────────
     private JLabel lblPoster;
+    private JLabel lblSynopsis = new JLabel();
+    private JLabel lblGenre    = new JLabel();
+    private JLabel lblDurasi   = new JLabel();
+    private JLabel lblRating   = new JLabel();
+
+    private String currentSynopsis = "-";
+    private String currentGenre    = "-";
+    private String currentDurasi   = "-";
+    private String currentRating   = "-";
 
     // ── State ──────────────────────────────────────────────────────────────────
     private String       selectedStudioName = "";
@@ -321,18 +330,17 @@ public class UserDashboard extends JFrame {
         JButton btnMakanan   = createMenuButton("🍿", "Makanan &\nMinuman",  new Color(190, 130, 0));
         JButton btnReset     = createMenuButton("🔄", "Reset Pesanan",       new Color(185, 20, 20));
         JButton btnKursi     = createMenuButton("🎙", "Pilih Kursi",         new Color(40, 90, 195));
-        JButton btnTrailer   = createMenuButton("🎞", "Lihat Trailer",       new Color(110, 40, 175));
+        JButton btnHistory   = createMenuButton("🧾", "Riwayat\nPembayaran", new Color(110, 40, 175));
         JButton btnPromo     = createMenuButton("🎟", "Gunakan Promo",       new Color(0, 155, 155));
 
         menuBox.add(btnJamStudio); menuBox.add(btnMakanan); menuBox.add(btnReset);
-        menuBox.add(btnKursi);     menuBox.add(btnTrailer); menuBox.add(btnPromo);
+        menuBox.add(btnKursi);     menuBox.add(btnHistory); menuBox.add(btnPromo);
 
         btnJamStudio.addActionListener(e -> showJamStudioDialog());
         btnMakanan.addActionListener(e   -> showFoodDialog());         // ← uses FoodMenuPanel
         btnKursi.addActionListener(e     -> showKursiDialog());        // ← uses SeatSelectionPanel
         btnReset.addActionListener(e     -> resetPesanan());
-        btnTrailer.addActionListener(e   -> JOptionPane.showMessageDialog(this,
-                "Fitur Lihat Trailer segera hadir!", "Info", JOptionPane.INFORMATION_MESSAGE));
+        btnHistory.addActionListener(e   -> new TransactionHistoryForm(userId).setVisible(true));
         btnPromo.addActionListener(e     -> showPromoDialog());
 
         wrapper.add(menuBox, BorderLayout.CENTER);
@@ -435,19 +443,8 @@ public class UserDashboard extends JFrame {
             }
         });
 
-        JButton btnHistory = new JButton("Riwayat Pembayaran");
-        btnHistory.setBackground(new Color(90, 90, 90));
-        btnHistory.setForeground(Color.WHITE);
-        btnHistory.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        btnHistory.setFocusPainted(false);
-        btnHistory.setPreferredSize(new Dimension(180, 40));
-        btnHistory.setBorder(BorderFactory.createLineBorder(new Color(120, 120, 120), 1));
-        btnHistory.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btnHistory.addActionListener(e -> new TransactionHistoryForm(userId).setVisible(true));
-
         JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 0));
         btnRow.setBackground(new Color(42, 42, 42));
-        btnRow.add(btnHistory);
         btnRow.add(btnConfirm);
 
         bottom.add(btnRow,    BorderLayout.CENTER);
@@ -1108,6 +1105,59 @@ public class UserDashboard extends JFrame {
         return "Rp " + String.format("%,d", amount).replace(',', '.');
     }
 
+    private void styleInfoLabel(JLabel lbl) {
+        lbl.setForeground(Color.WHITE);
+        lbl.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lbl.setVerticalAlignment(SwingConstants.TOP);
+    }
+
+    private JPanel createInfoRow(String label, String value) {
+        JPanel row = new JPanel(new BorderLayout(8, 0));
+        row.setOpaque(false);
+
+        JLabel key = new JLabel(label);
+        key.setForeground(new Color(205, 205, 205));
+        key.setFont(new Font("Segoe UI", Font.BOLD, 13));
+
+        JLabel val = new JLabel(escapeHtml(value));
+        val.setForeground(new Color(235, 235, 235));
+        val.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+
+        row.add(key, BorderLayout.WEST);
+        row.add(val, BorderLayout.CENTER);
+        return row;
+    }
+
+    private void setPosterDetail(String synopsis, String genre, String durasi, String rating) {
+        currentSynopsis = synopsis != null && !synopsis.isBlank() ? synopsis : "-";
+        currentGenre = genre != null && !genre.isBlank() ? genre : "-";
+        currentDurasi = durasi != null && !durasi.isBlank() ? durasi : "-";
+        currentRating = rating != null && !rating.isBlank() ? rating : "-";
+
+        lblSynopsis.setText(formatSynopsisHtml(currentSynopsis));
+        lblGenre.setText("<html><b>Genre:</b> " + escapeHtml(currentGenre) + "</html>");
+        lblDurasi.setText("<html><b>Durasi:</b> " + escapeHtml(currentDurasi) + "</html>");
+        lblRating.setText("<html><b>Rating:</b> " + escapeHtml(currentRating) + "</html>");
+    }
+
+    private String formatSynopsisHtml(String text) {
+        if (text == null || text.isBlank()) {
+            text = "-";
+        }
+        return "<html><body style='white-space:pre-wrap; width:260px; font-family:Segoe UI; font-size:12px; line-height:1.4;'>"
+                + escapeHtml(text)
+                + "</body></html>";
+    }
+
+    private String escapeHtml(String text) {
+        if (text == null) return "";
+        return text.replace("&", "&amp;")
+                   .replace("<", "&lt;")
+                   .replace(">", "&gt;")
+                   .replace("\"", "&quot;")
+                   .replace("\n", "<br>");
+    }
+
     private List<String> buildMovieTitleList() {
         List<String> titles = new ArrayList<>();
         for (int i = 0; i < listModel.size(); i++) {
@@ -1134,7 +1184,7 @@ public class UserDashboard extends JFrame {
     private void showPosterZoom(String posterPath) {
         JDialog zoomDialog = new JDialog(this, "Poster", true);
         zoomDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-        zoomDialog.setSize(420, 580);
+        zoomDialog.setSize(780, 600);
         zoomDialog.setLocationRelativeTo(this);
 
         JPanel root = new JPanel(new BorderLayout());
@@ -1146,7 +1196,7 @@ public class UserDashboard extends JFrame {
         zoomLabel.setVerticalAlignment(SwingConstants.CENTER);
         zoomLabel.setBorder(BorderFactory.createLineBorder(new Color(100, 100, 100), 2));
 
-        ImageIcon zoomIcon = loadPosterIcon(posterPath, 360, 520);
+        ImageIcon zoomIcon = loadPosterIcon(posterPath, 420, 520);
         if (zoomIcon != null) {
             zoomLabel.setIcon(zoomIcon);
         } else {
@@ -1155,26 +1205,87 @@ public class UserDashboard extends JFrame {
             zoomLabel.setFont(new Font("Segoe UI", Font.PLAIN, 18));
         }
 
-        JPanel info = new JPanel(new BorderLayout());
-        info.setOpaque(false);
-        info.setBorder(new EmptyBorder(12, 0, 0, 0));
+        JPanel detailsWrapper = new JPanel(new BorderLayout(0, 16));
+        detailsWrapper.setOpaque(false);
+        detailsWrapper.setBorder(new EmptyBorder(12, 16, 0, 0));
+        detailsWrapper.setPreferredSize(new Dimension(300, 0));
 
-        JLabel note = new JLabel("Klik Tutup untuk kembali");
-        note.setForeground(new Color(210, 210, 210));
-        note.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        note.setHorizontalAlignment(SwingConstants.CENTER);
-        info.add(note, BorderLayout.CENTER);
+        JPanel titlePanel = new JPanel(new BorderLayout());
+        titlePanel.setOpaque(false);
+        JLabel titleLabel = new JLabel(txtJudul.getText());
+        titleLabel.setForeground(new Color(245, 215, 110));
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        JLabel subtitleLabel = new JLabel("Detail Film");
+        subtitleLabel.setForeground(new Color(220, 220, 220));
+        subtitleLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        titlePanel.add(titleLabel, BorderLayout.NORTH);
+        titlePanel.add(subtitleLabel, BorderLayout.SOUTH);
+
+        JPanel infoPanel = new JPanel(new GridLayout(3, 1, 0, 12));
+        infoPanel.setOpaque(false);
+        infoPanel.add(createInfoRow("Genre", currentGenre));
+        infoPanel.add(createInfoRow("Durasi", currentDurasi));
+        infoPanel.add(createInfoRow("Rating", currentRating));
+
+        JLabel synopsisTitle = new JLabel("Sinopsis");
+        synopsisTitle.setForeground(new Color(245, 245, 245));
+        synopsisTitle.setFont(new Font("Segoe UI", Font.BOLD, 14));
+
+        JLabel synopsisLabel = new JLabel(formatSynopsisHtml(currentSynopsis));
+        synopsisLabel.setVerticalAlignment(SwingConstants.TOP);
+
+        JTextArea synopsisArea = new JTextArea(currentSynopsis);
+        synopsisArea.setLineWrap(true);
+        synopsisArea.setWrapStyleWord(true);
+        synopsisArea.setEditable(false);
+        synopsisArea.setFocusable(false);
+        synopsisArea.setOpaque(false);
+        synopsisArea.setForeground(Color.WHITE);
+        synopsisArea.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        synopsisArea.setBorder(null);
+        synopsisArea.setMargin(new Insets(0, 0, 0, 0));
+
+        JScrollPane synopsisScroll = new JScrollPane(synopsisArea,
+                ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+                ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        synopsisScroll.setBorder(BorderFactory.createEmptyBorder());
+        synopsisScroll.getViewport().setOpaque(false);
+        synopsisScroll.setOpaque(false);
+        synopsisScroll.setPreferredSize(new Dimension(280, 260));
+
+        JPanel synopsisPanel = new JPanel(new BorderLayout(0, 8));
+        synopsisPanel.setOpaque(false);
+        synopsisPanel.add(synopsisTitle, BorderLayout.NORTH);
+        synopsisPanel.add(synopsisScroll, BorderLayout.CENTER);
 
         JButton btnClose = new JButton("Tutup");
-        btnClose.setBackground(new Color(60, 60, 60));
+        btnClose.setBackground(new Color(180, 60, 60));
         btnClose.setForeground(Color.WHITE);
         btnClose.setFocusPainted(false);
-        btnClose.setBorder(BorderFactory.createLineBorder(new Color(120, 120, 120)));
+        btnClose.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        btnClose.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        btnClose.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btnClose.addActionListener(e -> zoomDialog.dispose());
-        info.add(btnClose, BorderLayout.SOUTH);
 
-        root.add(zoomLabel, BorderLayout.CENTER);
-        root.add(info, BorderLayout.SOUTH);
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        buttonPanel.setOpaque(false);
+        buttonPanel.add(btnClose);
+
+        JPanel centerPanel = new JPanel(new BorderLayout(0, 16));
+        centerPanel.setOpaque(false);
+        centerPanel.add(infoPanel, BorderLayout.NORTH);
+        centerPanel.add(synopsisPanel, BorderLayout.CENTER);
+
+        detailsWrapper.add(titlePanel, BorderLayout.NORTH);
+        detailsWrapper.add(centerPanel, BorderLayout.CENTER);
+        detailsWrapper.add(buttonPanel, BorderLayout.SOUTH);
+
+        JPanel posterContainer = new JPanel(new BorderLayout());
+        posterContainer.setOpaque(false);
+        posterContainer.add(zoomLabel, BorderLayout.CENTER);
+
+        root.add(posterContainer, BorderLayout.CENTER);
+        root.add(detailsWrapper, BorderLayout.EAST);
 
         zoomDialog.setContentPane(root);
         zoomDialog.setVisible(true);
@@ -1267,6 +1378,12 @@ public class UserDashboard extends JFrame {
                 selectedPromo = null;
                 if (persistentSeatPanel != null) persistentSeatPanel.resetSelections();
                 if (persistentFoodPanel  != null) persistentFoodPanel.resetOrder();
+
+                String synopsis = rs.getString("sinopsis");
+                String genre = rs.getString("genre");
+                String durasi = rs.getString("durasi");
+                String rating = rs.getString("rating_usia");
+                setPosterDetail(synopsis, genre, durasi + " menit", rating);
             }
             rs.close(); ps.close(); conn.close();
         } catch (Exception e) { e.printStackTrace(); }
