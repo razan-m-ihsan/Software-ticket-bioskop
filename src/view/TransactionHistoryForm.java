@@ -232,9 +232,8 @@ public class TransactionHistoryForm extends JFrame {
         }
         card.add(posterLabel, BorderLayout.WEST);
 
-        JPanel details = new JPanel();
+        JPanel details = new JPanel(new BorderLayout());
         details.setOpaque(false);
-        details.setLayout(new BoxLayout(details, BoxLayout.Y_AXIS));
 
         JTextArea titleArea = new JTextArea(title);
         titleArea.setOpaque(false);
@@ -246,14 +245,18 @@ public class TransactionHistoryForm extends JFrame {
         titleArea.setFocusable(false);
         titleArea.setBorder(new EmptyBorder(0, 0, 18, 0));
         titleArea.setMaximumSize(new Dimension(520, 80));
-        titleArea.setAlignmentX(Component.LEFT_ALIGNMENT);
-        details.add(titleArea);
+        titleArea.setPreferredSize(new Dimension(520, 80));
+        details.add(titleArea, BorderLayout.NORTH);
 
-        details.add(createInfoRow("Tanggal", formatDate(tanggal) + "  " + jam));
-        details.add(createInfoRow("Kursi", kursi));
-        details.add(createInfoRow("Metode", metode));
-        details.add(createInfoRow("Total", formatRp(total)));
-        details.add(createInfoRow("Status", statusLabel(status)));
+        JPanel infoPanel = new JPanel();
+        infoPanel.setOpaque(false);
+        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+        infoPanel.add(createInfoRow("Tanggal", formatDate(tanggal) + "  " + jam));
+        infoPanel.add(createInfoRow("Kursi", kursi));
+        infoPanel.add(createInfoRow("Metode", metode));
+        infoPanel.add(createInfoRow("Total", formatRp(total)));
+        infoPanel.add(createInfoRow("Status", statusLabel(status)));
+        details.add(infoPanel, BorderLayout.CENTER);
 
         JPanel spacer = new JPanel();
         spacer.setOpaque(false);
