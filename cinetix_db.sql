@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 01, 2026 at 01:43 PM
+-- Generation Time: May 04, 2026 at 08:57 AM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 7.3.33
 
@@ -44,8 +44,9 @@ CREATE TABLE `movies` (
 INSERT INTO `movies` (`id`, `judul`, `sinopsis`, `durasi`, `genre`, `rating_usia`, `poster_url`) VALUES
 (2, 'Avengers', '', 123, 'Action', '13+', 'avengers.jpg'),
 (6, 'El Camino: A Breaking Bad Movie', '', 122, 'Thriller', '13+', NULL),
-(7, 'AMBALANGKUNG THE MOVIE', '', 15, 'HOROR', '18+', NULL),
-(8, 'Project Hail Mary', '-', 120, 'gatau', '13+', NULL);
+(7, 'Ambalangkung The Movie', 'Flim yg berdasarkan kisah nyata loh ya, serem nya tiada Tara sebanding sama film ambaruwo dan si imut jembatan Ngawi yg juga di ambil dari kisah nyata', 15, 'HOROR', '18+', 'assets/Ambalangkung12_1777867448781.png'),
+(8, 'Project Hail Mary', '-', 120, 'gatau', '13+', NULL),
+(11, 'The Truman Show', 'The Truman Show adalah film psikologis drama komedi Amerika tahun 1998[2] ditulis dan diproduksi bersama oleh Andrew Niccol, dan disutradarai oleh Peter Weir. Film ini menggambarkan kisah Truman Burbank (diperankan oleh Jim Carrey), seorang pria yang tidak menyadari bahwa ia menjalani seluruh hidupnya di panggung suara raksasa, dan difilmkan dan disi', 103, 'Horror', '13+', 'assets/it-vsN6Zs-1728250393_1777864961214.jpg');
 
 -- --------------------------------------------------------
 
@@ -69,7 +70,7 @@ CREATE TABLE `promos` (
 --
 
 INSERT INTO `promos` (`id`, `kode_promo`, `deskripsi`, `diskon_persen`, `diskon_rupiah`, `tanggal_mulai`, `tanggal_akhir`, `aktif`) VALUES
-(2, 'HEMAT50K', 'Hemat Rp 50.000 untuk tiket premium', 0, 50000, '2026-04-01', '2026-04-30', 0),
+(2, 'HEMAT50K', 'Hemat Rp 50.000 ', 0, 50000, '2026-04-01', '2026-04-30', 0),
 (3, 'PromoOpening', 'Promo Opening Cinematix', 20, 0, '2026-04-21', '2026-05-21', 1);
 
 -- --------------------------------------------------------
@@ -92,7 +93,14 @@ CREATE TABLE `schedules` (
 --
 
 INSERT INTO `schedules` (`id`, `movie_id`, `studio_id`, `tanggal_tayang`, `jam_tayang`, `harga`) VALUES
-(1, 2, 2, '2026-04-10', '19:00:00', '50000.00');
+(1, 2, 2, '2026-04-10', '19:00:00', '50000.00'),
+(2, 7, 2, '2026-05-01', '10:30:00', '85000.00'),
+(3, 8, 2, '2026-05-01', '12:00:00', '85000.00'),
+(4, 6, 2, '2026-05-01', '18:00:00', '85000.00'),
+(5, 2, 1, '2026-05-01', '12:00:00', '75000.00'),
+(6, 8, 4, '2026-05-04', '13:00:00', '150000.00'),
+(7, 7, 4, '2026-05-04', '13:00:00', '150000.00'),
+(8, 7, 2, '2026-05-04', '18:00:00', '85000.00');
 
 -- --------------------------------------------------------
 
@@ -175,7 +183,18 @@ INSERT INTO `transactions` (`id`, `user_id`, `schedule_id`, `nomor_kursi`, `tota
 (35, 2, 1, 'C6', '50000.00', 'QRIS', 'Success', '2026-04-10 12:59:51'),
 (36, 2, 1, 'C7', '50000.00', 'QRIS', 'Success', '2026-04-10 12:59:51'),
 (37, 2, 1, 'C6', '50000.00', 'QRIS', 'Success', '2026-04-10 13:00:04'),
-(38, 2, 1, 'C7', '50000.00', 'QRIS', 'Success', '2026-04-10 13:00:04');
+(38, 2, 1, 'C7', '50000.00', 'QRIS', 'Success', '2026-04-10 13:00:04'),
+(39, 4, 2, 'B4', '85000.00', 'E-Wallet', 'Success', '2026-05-01 12:21:31'),
+(40, 4, 3, 'G11', '85000.00', 'E-Wallet', 'Success', '2026-05-01 12:22:09'),
+(41, 4, 4, 'F12', '85000.00', 'Kartu debit/Credit', 'Success', '2026-05-01 12:26:47'),
+(42, 4, 4, 'D12', '85000.00', 'Kartu debit/Credit', 'Success', '2026-05-01 12:26:47'),
+(43, 4, 5, 'D7', '75000.00', 'E-Wallet', 'Success', '2026-05-01 13:00:48'),
+(44, 4, 5, 'F7', '75000.00', 'E-Wallet', 'Success', '2026-05-01 13:00:48'),
+(45, 4, 6, 'A7', '150000.00', 'Transfer Bank', 'Success', '2026-05-04 03:05:17'),
+(46, 2, 7, 'F8', '150000.00', 'E-Wallet', 'Success', '2026-05-04 04:08:25'),
+(47, 2, 7, 'D8', '150000.00', 'E-Wallet', 'Success', '2026-05-04 04:08:25'),
+(48, 4, 8, 'B8', '85000.00', 'E-Wallet', 'Success', '2026-05-04 04:27:37'),
+(49, 4, 8, 'D9', '85000.00', 'E-Wallet', 'Success', '2026-05-04 04:27:37');
 
 -- --------------------------------------------------------
 
@@ -255,7 +274,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `movies`
 --
 ALTER TABLE `movies`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `promos`
@@ -267,7 +286,7 @@ ALTER TABLE `promos`
 -- AUTO_INCREMENT for table `schedules`
 --
 ALTER TABLE `schedules`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `studios`
@@ -279,7 +298,7 @@ ALTER TABLE `studios`
 -- AUTO_INCREMENT for table `transactions`
 --
 ALTER TABLE `transactions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
 
 --
 -- AUTO_INCREMENT for table `users`
