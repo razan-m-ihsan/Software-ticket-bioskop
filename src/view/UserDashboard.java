@@ -1158,6 +1158,26 @@ public class UserDashboard extends JFrame {
                    .replace("\n", "<br>");
     }
 
+    private String formatTitleHtml(String title) {
+        if (title == null || title.isEmpty()) {
+            title = "-";
+        }
+        String text = escapeHtml(title);
+        if (text.length() > 23) {
+            int breakPos = 23;
+            while (breakPos > 0 && text.charAt(breakPos) != ' ') {
+                breakPos--;
+            }
+            if (breakPos == 0) {
+                breakPos = 23;
+            }
+            text = text.substring(0, breakPos) + "<br>" + text.substring(breakPos).trim();
+        }
+        return "<html><body style='width:340px; white-space:normal; font-family:Segoe UI; font-size:22px;'>"
+                + text
+                + "</body></html>";
+    }
+
     private List<String> buildMovieTitleList() {
         List<String> titles = new ArrayList<>();
         for (int i = 0; i < listModel.size(); i++) {
@@ -1208,13 +1228,14 @@ public class UserDashboard extends JFrame {
         JPanel detailsWrapper = new JPanel(new BorderLayout(0, 16));
         detailsWrapper.setOpaque(false);
         detailsWrapper.setBorder(new EmptyBorder(12, 16, 0, 0));
-        detailsWrapper.setPreferredSize(new Dimension(300, 0));
+        detailsWrapper.setPreferredSize(new Dimension(380, 0));
 
         JPanel titlePanel = new JPanel(new BorderLayout());
         titlePanel.setOpaque(false);
-        JLabel titleLabel = new JLabel(txtJudul.getText());
+        JLabel titleLabel = new JLabel(formatTitleHtml(txtJudul.getText()));
         titleLabel.setForeground(new Color(245, 215, 110));
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        titleLabel.setVerticalAlignment(SwingConstants.TOP);
         JLabel subtitleLabel = new JLabel("Detail Film");
         subtitleLabel.setForeground(new Color(220, 220, 220));
         subtitleLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));

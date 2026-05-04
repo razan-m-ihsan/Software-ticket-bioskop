@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.1.1
+-- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 04, 2026 at 08:57 AM
--- Server version: 10.4.22-MariaDB
--- PHP Version: 7.3.33
+-- Generation Time: May 04, 2026 at 01:30 PM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `cinetix_db`
+-- Database: `cinetix2_db`
 --
 
 -- --------------------------------------------------------
@@ -35,7 +35,7 @@ CREATE TABLE `movies` (
   `genre` varchar(100) DEFAULT NULL,
   `rating_usia` varchar(10) DEFAULT NULL,
   `poster_url` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `movies`
@@ -46,7 +46,8 @@ INSERT INTO `movies` (`id`, `judul`, `sinopsis`, `durasi`, `genre`, `rating_usia
 (6, 'El Camino: A Breaking Bad Movie', '', 122, 'Thriller', '13+', NULL),
 (7, 'Ambalangkung The Movie', 'Flim yg berdasarkan kisah nyata loh ya, serem nya tiada Tara sebanding sama film ambaruwo dan si imut jembatan Ngawi yg juga di ambil dari kisah nyata', 15, 'HOROR', '18+', 'assets/Ambalangkung12_1777867448781.png'),
 (8, 'Project Hail Mary', '-', 120, 'gatau', '13+', NULL),
-(11, 'The Truman Show', 'The Truman Show adalah film psikologis drama komedi Amerika tahun 1998[2] ditulis dan diproduksi bersama oleh Andrew Niccol, dan disutradarai oleh Peter Weir. Film ini menggambarkan kisah Truman Burbank (diperankan oleh Jim Carrey), seorang pria yang tidak menyadari bahwa ia menjalani seluruh hidupnya di panggung suara raksasa, dan difilmkan dan disi', 103, 'Horror', '13+', 'assets/it-vsN6Zs-1728250393_1777864961214.jpg');
+(11, 'The Truman Show', 'The Truman Show adalah film psikologis drama komedi Amerika tahun 1998[2] ditulis dan diproduksi bersama oleh Andrew Niccol, dan disutradarai oleh Peter Weir. Film ini menggambarkan kisah Truman Burbank (diperankan oleh Jim Carrey), seorang pria yang tidak menyadari bahwa ia menjalani seluruh hidupnya di panggung suara raksasa, dan difilmkan dan disi', 103, 'Horror', '13+', 'assets/it-vsN6Zs-1728250393_1777864961214.jpg'),
+(12, 'Spider-Man: Brand New Day', 'Berlatar empat tahun setelah peristiwa Spider-Man: No Way Home, Peter Parker kini hidup dalam isolasi total. Karena semua orang telah melupakan siapa dia, Peter sepenuhnya mendedikasikan hidupnya untuk menjadi Spider-Man dan menjaga keamanan New York di tingkat jalanan (street-level).', 140, 'action, adventure, and fantasy superhero film', '13+', 'assets/Spiderman_Brand_New_Day_1777893865117.jpg');
 
 -- --------------------------------------------------------
 
@@ -63,7 +64,7 @@ CREATE TABLE `promos` (
   `tanggal_mulai` date NOT NULL,
   `tanggal_akhir` date NOT NULL,
   `aktif` tinyint(1) NOT NULL DEFAULT 1
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `promos`
@@ -86,21 +87,21 @@ CREATE TABLE `schedules` (
   `tanggal_tayang` date NOT NULL,
   `jam_tayang` time NOT NULL,
   `harga` decimal(10,2) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `schedules`
 --
 
 INSERT INTO `schedules` (`id`, `movie_id`, `studio_id`, `tanggal_tayang`, `jam_tayang`, `harga`) VALUES
-(1, 2, 2, '2026-04-10', '19:00:00', '50000.00'),
-(2, 7, 2, '2026-05-01', '10:30:00', '85000.00'),
-(3, 8, 2, '2026-05-01', '12:00:00', '85000.00'),
-(4, 6, 2, '2026-05-01', '18:00:00', '85000.00'),
-(5, 2, 1, '2026-05-01', '12:00:00', '75000.00'),
-(6, 8, 4, '2026-05-04', '13:00:00', '150000.00'),
-(7, 7, 4, '2026-05-04', '13:00:00', '150000.00'),
-(8, 7, 2, '2026-05-04', '18:00:00', '85000.00');
+(1, 2, 2, '2026-04-10', '19:00:00', 50000.00),
+(2, 7, 2, '2026-05-01', '10:30:00', 85000.00),
+(3, 8, 2, '2026-05-01', '12:00:00', 85000.00),
+(4, 6, 2, '2026-05-01', '18:00:00', 85000.00),
+(5, 2, 1, '2026-05-01', '12:00:00', 75000.00),
+(6, 8, 4, '2026-05-04', '13:00:00', 150000.00),
+(7, 7, 4, '2026-05-04', '13:00:00', 150000.00),
+(8, 7, 2, '2026-05-04', '18:00:00', 85000.00);
 
 -- --------------------------------------------------------
 
@@ -112,7 +113,7 @@ CREATE TABLE `studios` (
   `id` int(11) NOT NULL,
   `nama_studio` varchar(50) NOT NULL,
   `kapasitas` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `studios`
@@ -139,62 +140,62 @@ CREATE TABLE `transactions` (
   `metode_pembayaran` varchar(50) NOT NULL,
   `status` enum('Pending','Success','Failed') DEFAULT 'Pending',
   `waktu_transaksi` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `transactions`
 --
 
 INSERT INTO `transactions` (`id`, `user_id`, `schedule_id`, `nomor_kursi`, `total_harga`, `metode_pembayaran`, `status`, `waktu_transaksi`) VALUES
-(1, 1, 1, 'A5', '50000.00', 'QRIS', 'Success', '2026-04-10 04:55:58'),
-(2, 1, 1, 'A4', '50000.00', 'QRIS', 'Success', '2026-04-10 04:55:58'),
-(3, 1, 1, 'A6', '50000.00', 'QRIS', 'Success', '2026-04-10 04:56:12'),
-(4, 1, 1, 'A7', '50000.00', 'QRIS', 'Success', '2026-04-10 04:56:12'),
-(5, 1, 1, 'A8', '50000.00', 'QRIS', 'Success', '2026-04-10 04:57:04'),
-(6, 1, 1, 'A7', '50000.00', 'QRIS', 'Success', '2026-04-10 04:57:04'),
-(7, 1, 1, 'A3', '50000.00', 'QRIS', 'Success', '2026-04-10 05:01:16'),
-(8, 1, 1, 'A2', '50000.00', 'QRIS', 'Success', '2026-04-10 05:01:16'),
-(9, 1, 1, 'A1', '50000.00', 'QRIS', 'Success', '2026-04-10 05:01:16'),
-(10, 1, 1, 'B6', '50000.00', 'QRIS', 'Success', '2026-04-10 10:23:32'),
-(11, 1, 1, 'B5', '50000.00', 'QRIS', 'Success', '2026-04-10 10:23:32'),
-(12, 1, 1, 'B4', '50000.00', 'QRIS', 'Success', '2026-04-10 10:23:32'),
-(13, 1, 1, 'B7', '50000.00', 'QRIS', 'Success', '2026-04-10 10:23:32'),
-(14, 1, 1, 'B8', '50000.00', 'QRIS', 'Success', '2026-04-10 10:27:50'),
-(15, 1, 1, 'C8', '50000.00', 'QRIS', 'Success', '2026-04-10 10:27:50'),
-(16, 2, 1, 'B2', '50000.00', 'QRIS', 'Success', '2026-04-10 10:48:49'),
-(17, 2, 1, 'B1', '50000.00', 'QRIS', 'Success', '2026-04-10 10:48:49'),
-(18, 2, 1, 'B3', '50000.00', 'QRIS', 'Success', '2026-04-10 11:38:22'),
-(19, 2, 1, 'C3', '50000.00', 'QRIS', 'Success', '2026-04-10 11:38:22'),
-(20, 2, 1, 'C4', '50000.00', 'QRIS', 'Success', '2026-04-10 11:38:22'),
-(21, 2, 1, 'C2', '50000.00', 'QRIS', 'Success', '2026-04-10 12:59:11'),
-(22, 2, 1, 'C1', '50000.00', 'QRIS', 'Success', '2026-04-10 12:59:11'),
-(23, 2, 1, 'C5', '50000.00', 'QRIS', 'Success', '2026-04-10 12:59:24'),
-(24, 2, 1, 'C5', '50000.00', 'QRIS', 'Success', '2026-04-10 12:59:25'),
-(25, 2, 1, 'C5', '50000.00', 'QRIS', 'Success', '2026-04-10 12:59:25'),
-(26, 2, 1, 'C5', '50000.00', 'QRIS', 'Success', '2026-04-10 12:59:26'),
-(27, 2, 1, 'C5', '50000.00', 'QRIS', 'Success', '2026-04-10 12:59:26'),
-(28, 2, 1, 'C5', '50000.00', 'QRIS', 'Success', '2026-04-10 12:59:42'),
-(29, 2, 1, 'C6', '50000.00', 'QRIS', 'Success', '2026-04-10 12:59:50'),
-(30, 2, 1, 'C7', '50000.00', 'QRIS', 'Success', '2026-04-10 12:59:50'),
-(31, 2, 1, 'C6', '50000.00', 'QRIS', 'Success', '2026-04-10 12:59:51'),
-(32, 2, 1, 'C7', '50000.00', 'QRIS', 'Success', '2026-04-10 12:59:51'),
-(33, 2, 1, 'C6', '50000.00', 'QRIS', 'Success', '2026-04-10 12:59:51'),
-(34, 2, 1, 'C7', '50000.00', 'QRIS', 'Success', '2026-04-10 12:59:51'),
-(35, 2, 1, 'C6', '50000.00', 'QRIS', 'Success', '2026-04-10 12:59:51'),
-(36, 2, 1, 'C7', '50000.00', 'QRIS', 'Success', '2026-04-10 12:59:51'),
-(37, 2, 1, 'C6', '50000.00', 'QRIS', 'Success', '2026-04-10 13:00:04'),
-(38, 2, 1, 'C7', '50000.00', 'QRIS', 'Success', '2026-04-10 13:00:04'),
-(39, 4, 2, 'B4', '85000.00', 'E-Wallet', 'Success', '2026-05-01 12:21:31'),
-(40, 4, 3, 'G11', '85000.00', 'E-Wallet', 'Success', '2026-05-01 12:22:09'),
-(41, 4, 4, 'F12', '85000.00', 'Kartu debit/Credit', 'Success', '2026-05-01 12:26:47'),
-(42, 4, 4, 'D12', '85000.00', 'Kartu debit/Credit', 'Success', '2026-05-01 12:26:47'),
-(43, 4, 5, 'D7', '75000.00', 'E-Wallet', 'Success', '2026-05-01 13:00:48'),
-(44, 4, 5, 'F7', '75000.00', 'E-Wallet', 'Success', '2026-05-01 13:00:48'),
-(45, 4, 6, 'A7', '150000.00', 'Transfer Bank', 'Success', '2026-05-04 03:05:17'),
-(46, 2, 7, 'F8', '150000.00', 'E-Wallet', 'Success', '2026-05-04 04:08:25'),
-(47, 2, 7, 'D8', '150000.00', 'E-Wallet', 'Success', '2026-05-04 04:08:25'),
-(48, 4, 8, 'B8', '85000.00', 'E-Wallet', 'Success', '2026-05-04 04:27:37'),
-(49, 4, 8, 'D9', '85000.00', 'E-Wallet', 'Success', '2026-05-04 04:27:37');
+(1, 1, 1, 'A5', 50000.00, 'QRIS', 'Success', '2026-04-10 04:55:58'),
+(2, 1, 1, 'A4', 50000.00, 'QRIS', 'Success', '2026-04-10 04:55:58'),
+(3, 1, 1, 'A6', 50000.00, 'QRIS', 'Success', '2026-04-10 04:56:12'),
+(4, 1, 1, 'A7', 50000.00, 'QRIS', 'Success', '2026-04-10 04:56:12'),
+(5, 1, 1, 'A8', 50000.00, 'QRIS', 'Success', '2026-04-10 04:57:04'),
+(6, 1, 1, 'A7', 50000.00, 'QRIS', 'Success', '2026-04-10 04:57:04'),
+(7, 1, 1, 'A3', 50000.00, 'QRIS', 'Success', '2026-04-10 05:01:16'),
+(8, 1, 1, 'A2', 50000.00, 'QRIS', 'Success', '2026-04-10 05:01:16'),
+(9, 1, 1, 'A1', 50000.00, 'QRIS', 'Success', '2026-04-10 05:01:16'),
+(10, 1, 1, 'B6', 50000.00, 'QRIS', 'Success', '2026-04-10 10:23:32'),
+(11, 1, 1, 'B5', 50000.00, 'QRIS', 'Success', '2026-04-10 10:23:32'),
+(12, 1, 1, 'B4', 50000.00, 'QRIS', 'Success', '2026-04-10 10:23:32'),
+(13, 1, 1, 'B7', 50000.00, 'QRIS', 'Success', '2026-04-10 10:23:32'),
+(14, 1, 1, 'B8', 50000.00, 'QRIS', 'Success', '2026-04-10 10:27:50'),
+(15, 1, 1, 'C8', 50000.00, 'QRIS', 'Success', '2026-04-10 10:27:50'),
+(16, 2, 1, 'B2', 50000.00, 'QRIS', 'Success', '2026-04-10 10:48:49'),
+(17, 2, 1, 'B1', 50000.00, 'QRIS', 'Success', '2026-04-10 10:48:49'),
+(18, 2, 1, 'B3', 50000.00, 'QRIS', 'Success', '2026-04-10 11:38:22'),
+(19, 2, 1, 'C3', 50000.00, 'QRIS', 'Success', '2026-04-10 11:38:22'),
+(20, 2, 1, 'C4', 50000.00, 'QRIS', 'Success', '2026-04-10 11:38:22'),
+(21, 2, 1, 'C2', 50000.00, 'QRIS', 'Success', '2026-04-10 12:59:11'),
+(22, 2, 1, 'C1', 50000.00, 'QRIS', 'Success', '2026-04-10 12:59:11'),
+(23, 2, 1, 'C5', 50000.00, 'QRIS', 'Success', '2026-04-10 12:59:24'),
+(24, 2, 1, 'C5', 50000.00, 'QRIS', 'Success', '2026-04-10 12:59:25'),
+(25, 2, 1, 'C5', 50000.00, 'QRIS', 'Success', '2026-04-10 12:59:25'),
+(26, 2, 1, 'C5', 50000.00, 'QRIS', 'Success', '2026-04-10 12:59:26'),
+(27, 2, 1, 'C5', 50000.00, 'QRIS', 'Success', '2026-04-10 12:59:26'),
+(28, 2, 1, 'C5', 50000.00, 'QRIS', 'Success', '2026-04-10 12:59:42'),
+(29, 2, 1, 'C6', 50000.00, 'QRIS', 'Success', '2026-04-10 12:59:50'),
+(30, 2, 1, 'C7', 50000.00, 'QRIS', 'Success', '2026-04-10 12:59:50'),
+(31, 2, 1, 'C6', 50000.00, 'QRIS', 'Success', '2026-04-10 12:59:51'),
+(32, 2, 1, 'C7', 50000.00, 'QRIS', 'Success', '2026-04-10 12:59:51'),
+(33, 2, 1, 'C6', 50000.00, 'QRIS', 'Success', '2026-04-10 12:59:51'),
+(34, 2, 1, 'C7', 50000.00, 'QRIS', 'Success', '2026-04-10 12:59:51'),
+(35, 2, 1, 'C6', 50000.00, 'QRIS', 'Success', '2026-04-10 12:59:51'),
+(36, 2, 1, 'C7', 50000.00, 'QRIS', 'Success', '2026-04-10 12:59:51'),
+(37, 2, 1, 'C6', 50000.00, 'QRIS', 'Success', '2026-04-10 13:00:04'),
+(38, 2, 1, 'C7', 50000.00, 'QRIS', 'Success', '2026-04-10 13:00:04'),
+(39, 4, 2, 'B4', 85000.00, 'E-Wallet', 'Success', '2026-05-01 12:21:31'),
+(40, 4, 3, 'G11', 85000.00, 'E-Wallet', 'Success', '2026-05-01 12:22:09'),
+(41, 4, 4, 'F12', 85000.00, 'Kartu debit/Credit', 'Success', '2026-05-01 12:26:47'),
+(42, 4, 4, 'D12', 85000.00, 'Kartu debit/Credit', 'Success', '2026-05-01 12:26:47'),
+(43, 4, 5, 'D7', 75000.00, 'E-Wallet', 'Success', '2026-05-01 13:00:48'),
+(44, 4, 5, 'F7', 75000.00, 'E-Wallet', 'Success', '2026-05-01 13:00:48'),
+(45, 4, 6, 'A7', 150000.00, 'Transfer Bank', 'Success', '2026-05-04 03:05:17'),
+(46, 2, 7, 'F8', 150000.00, 'E-Wallet', 'Success', '2026-05-04 04:08:25'),
+(47, 2, 7, 'D8', 150000.00, 'E-Wallet', 'Success', '2026-05-04 04:08:25'),
+(48, 4, 8, 'B8', 85000.00, 'E-Wallet', 'Success', '2026-05-04 04:27:37'),
+(49, 4, 8, 'D9', 85000.00, 'E-Wallet', 'Success', '2026-05-04 04:27:37');
 
 -- --------------------------------------------------------
 
@@ -208,7 +209,7 @@ CREATE TABLE `users` (
   `email` varchar(100) NOT NULL,
   `password` varchar(255) NOT NULL,
   `role` enum('Admin','User') NOT NULL DEFAULT 'User'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users`
@@ -274,7 +275,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `movies`
 --
 ALTER TABLE `movies`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `promos`
