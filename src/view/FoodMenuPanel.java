@@ -227,8 +227,11 @@ public class FoodMenuPanel extends JPanel {
         btn.setFont(new Font("Segoe UI", Font.BOLD, 16));
         btn.setBackground(QTY_BTN_BG);
         btn.setForeground(Color.WHITE);
+        btn.setOpaque(true);
+        btn.setContentAreaFilled(true);
         btn.setFocusPainted(false);
         btn.setBorderPainted(false);
+        btn.setMargin(new Insets(0, 0, 0, 0));
         btn.setPreferredSize(new Dimension(45, 30));
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btn.addMouseListener(new MouseAdapter() {
