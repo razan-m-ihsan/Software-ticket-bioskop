@@ -1129,10 +1129,10 @@ public class UserDashboard extends JFrame {
     }
 
     private void setPosterDetail(String synopsis, String genre, String durasi, String rating) {
-        currentSynopsis = synopsis != null && !synopsis.isBlank() ? synopsis : "-";
-        currentGenre = genre != null && !genre.isBlank() ? genre : "-";
-        currentDurasi = durasi != null && !durasi.isBlank() ? durasi : "-";
-        currentRating = rating != null && !rating.isBlank() ? rating : "-";
+        currentSynopsis = synopsis != null && !synopsis.isEmpty() ? synopsis : "-";
+        currentGenre = genre != null && !genre.isEmpty() ? genre : "-";
+        currentDurasi = durasi != null && !durasi.isEmpty() ? durasi : "-";
+        currentRating = rating != null && !rating.isEmpty() ? rating : "-";
 
         lblSynopsis.setText(formatSynopsisHtml(currentSynopsis));
         lblGenre.setText("<html><b>Genre:</b> " + escapeHtml(currentGenre) + "</html>");
@@ -1141,7 +1141,7 @@ public class UserDashboard extends JFrame {
     }
 
     private String formatSynopsisHtml(String text) {
-        if (text == null || text.isBlank()) {
+        if (text == null || text.isEmpty()) {
             text = "-";
         }
         return "<html><body style='white-space:pre-wrap; width:260px; font-family:Segoe UI; font-size:12px; line-height:1.4;'>"

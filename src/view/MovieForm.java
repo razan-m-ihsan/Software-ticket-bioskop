@@ -223,7 +223,7 @@ public class MovieForm extends JFrame {
     }
 
     private String storePosterToAssets(String posterPath) {
-        if (posterPath == null || posterPath.isBlank()) {
+        if (posterPath == null || posterPath.isEmpty()) {
             return "";
         }
 
