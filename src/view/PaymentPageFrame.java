@@ -4,11 +4,13 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import config.DatabaseConnection;
@@ -17,6 +19,7 @@ import util.QRCodeGenerator;
 public class PaymentPageFrame extends JFrame {
 
     private String selectedMethod = "E-Wallet";
+    private String selectedMethodType = "ewallet";
 
     public PaymentPageFrame(
         int userId,
@@ -284,6 +287,7 @@ public class PaymentPageFrame extends JFrame {
             @Override
             public void mouseClicked(MouseEvent e) {
                 selectedMethod = title;
+                selectedMethodType = type;
                 Component parent = card.getParent();
                 if (parent instanceof JPanel) {
                     for (Component comp : ((JPanel) parent).getComponents()) {
@@ -318,16 +322,46 @@ public class PaymentPageFrame extends JFrame {
         }
     }
 
-    private JLabel createLogo(String path, int w, int h) {
+    private ImageIcon loadIcon(String path, int maxWidth, int maxHeight) {
         try {
+            BufferedImage img = null;
             java.net.URL url = getClass().getResource(path);
-            if (url == null) return new JLabel();
-            ImageIcon icon = new ImageIcon(url);
-            Image img = icon.getImage().getScaledInstance(w, h, Image.SCALE_SMOOTH);
-            return new JLabel(new ImageIcon(img));
+            if (url != null) {
+                img = ImageIO.read(url);
+            } else {
+                File imageFile = new File("src" + path);
+                if (imageFile.exists()) {
+                    img = ImageIO.read(imageFile);
+                }
+            }
+            if (img == null) return null;
+
+            int origW = img.getWidth();
+            int origH = img.getHeight();
+            double scale = Math.min((double) maxWidth / origW, (double) maxHeight / origH);
+            int targetW = (int) Math.max(1, Math.round(origW * scale));
+            int targetH = (int) Math.max(1, Math.round(origH * scale));
+            Image scaledImg = getScaledImage(img, targetW, targetH);
+            return new ImageIcon(scaledImg);
         } catch (Exception e) {
-            return new JLabel();
+            return null;
         }
+    }
+
+    private Image getScaledImage(BufferedImage src, int width, int height) {
+        BufferedImage dest = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = dest.createGraphics();
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+        g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.drawImage(src, 0, 0, width, height, null);
+        g2.dispose();
+        return dest;
+    }
+
+    private JLabel createLogo(String path, int w, int h) {
+        ImageIcon icon = loadIcon(path, w, h);
+        return icon != null ? new JLabel(icon) : new JLabel();
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
@@ -351,114 +385,210 @@ public class PaymentPageFrame extends JFrame {
         JFrame frame = new JFrame("Pembayaran Berhasil");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(true);
-        frame.setMinimumSize(new Dimension(620, 340));
-        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        frame.setMinimumSize(new Dimension(1120, 720));
+        frame.setSize(1180, 760);
+        frame.setLocationRelativeTo(null);
 
         JPanel root = new JPanel(new BorderLayout());
         root.setBackground(new Color(30, 30, 30));
+        root.setBorder(new EmptyBorder(10, 10, 10, 10));
         frame.add(root);
-
-        JPanel topStripe = new JPanel();
-        topStripe.setBackground(new Color(30, 120, 60));
-        topStripe.setPreferredSize(new Dimension(0, 8));
-        root.add(topStripe, BorderLayout.NORTH);
 
         JPanel centre = new JPanel();
         centre.setBackground(new Color(30, 30, 30));
         centre.setLayout(new BoxLayout(centre, BoxLayout.Y_AXIS));
-        centre.setBorder(new EmptyBorder(36, 40, 20, 40));
+        centre.setBorder(new EmptyBorder(32, 40, 32, 40));
 
-        JLabel iconLbl = new JLabel("\u2705", SwingConstants.CENTER);
-        iconLbl.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 56));
+        JLabel iconLbl = new JLabel("🛒", SwingConstants.CENTER);
+        iconLbl.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 60));
+        iconLbl.setForeground(new Color(130, 220, 130));
         iconLbl.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         JLabel headLbl = new JLabel("Pembayaran Berhasil!", SwingConstants.CENTER);
-        headLbl.setForeground(new Color(60, 220, 100));
-        headLbl.setFont(new Font("Krona One", Font.BOLD, 22));
+        headLbl.setForeground(new Color(130, 220, 130));
+        headLbl.setFont(new Font("Segoe UI", Font.BOLD, 30));
         headLbl.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         JLabel subLbl = new JLabel("Terima kasih telah menggunakan CineTix.", SwingConstants.CENTER);
-        subLbl.setForeground(new Color(180, 180, 180));
-        subLbl.setFont(new Font("Krona One", Font.PLAIN, 12));
+        subLbl.setForeground(new Color(190, 190, 190));
+        subLbl.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         subLbl.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JPanel detailCard = new JPanel(new GridLayout(2, 2, 16, 8));
-        detailCard.setBackground(new Color(45, 45, 45));
-        detailCard.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(60, 60, 60)),
-                new EmptyBorder(14, 18, 14, 18)));
-        detailCard.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
-        detailCard.setAlignmentX(Component.CENTER_ALIGNMENT);
+        centre.add(iconLbl);
+        centre.add(Box.createVerticalStrut(18));
+        centre.add(headLbl);
+        centre.add(Box.createVerticalStrut(8));
+        centre.add(subLbl);
+        centre.add(Box.createVerticalStrut(32));
 
-        detailCard.add(cardLabel("Metode Pembayaran", new Color(160, 160, 160)));
-        detailCard.add(cardLabel("Total Dibayar", new Color(160, 160, 160)));
-        detailCard.add(cardLabel(selectedMethod, Color.WHITE));
-        detailCard.add(cardLabel(formatRp(finalTotal), new Color(255, 200, 0)));
+        JPanel contentRow = new JPanel(new BorderLayout(24, 0));
+        contentRow.setOpaque(false);
+
+        JPanel paymentCard = new JPanel();
+        paymentCard.setLayout(new BoxLayout(paymentCard, BoxLayout.Y_AXIS));
+        paymentCard.setBackground(new Color(40, 40, 40));
+        paymentCard.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(80, 80, 80), 1),
+                new EmptyBorder(28, 28, 28, 28)));
+
+        JPanel methodPanel = new JPanel();
+        methodPanel.setLayout(new BoxLayout(methodPanel, BoxLayout.X_AXIS));
+        methodPanel.setOpaque(false);
+        methodPanel.setPreferredSize(new Dimension(320, 80));
+        methodPanel.setMaximumSize(new Dimension(320, 80));
+        methodPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JLabel methodIconLbl = new JLabel();
+        methodIconLbl.setHorizontalAlignment(SwingConstants.CENTER);
+        methodIconLbl.setVerticalAlignment(SwingConstants.CENTER);
+        methodIconLbl.setPreferredSize(new Dimension(80, 80));
+        methodIconLbl.setOpaque(false);
+        methodIconLbl.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        ImageIcon methodIcon = loadPaymentIcon(selectedMethodType, 72, 72);
+        if (methodIcon != null) {
+            methodIconLbl.setIcon(methodIcon);
+            methodIconLbl.setText("");
+        } else {
+            methodIconLbl.setText(selectedMethod.substring(0, 1));
+            methodIconLbl.setForeground(Color.WHITE);
+            methodIconLbl.setFont(new Font("Segoe UI", Font.BOLD, 34));
+        }
+
+        JPanel methodInfoPanel = new JPanel();
+        methodInfoPanel.setLayout(new BoxLayout(methodInfoPanel, BoxLayout.Y_AXIS));
+        methodInfoPanel.setOpaque(false);
+        methodInfoPanel.setBorder(new EmptyBorder(8, 0, 8, 0));
+        methodInfoPanel.setAlignmentY(Component.CENTER_ALIGNMENT);
+
+        JLabel methodLabel = new JLabel("Metode Pembayaran");
+        methodLabel.setForeground(new Color(170, 170, 170));
+        methodLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        methodLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel methodValue = new JLabel(selectedMethod);
+        methodValue.setForeground(Color.WHITE);
+        methodValue.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        methodValue.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        methodInfoPanel.add(methodLabel);
+        methodInfoPanel.add(Box.createVerticalStrut(6));
+        methodInfoPanel.add(methodValue);
+
+        methodPanel.add(methodIconLbl);
+        methodPanel.add(Box.createHorizontalStrut(16));
+        methodPanel.add(methodInfoPanel);
+
+        paymentCard.add(methodPanel);
+        paymentCard.add(Box.createVerticalStrut(20));
+
+        JSeparator separator = new JSeparator();
+        separator.setForeground(new Color(90, 90, 90));
+        paymentCard.add(separator);
+        paymentCard.add(Box.createVerticalStrut(24));
+
+        JLabel totalIconLbl = new JLabel("💵", SwingConstants.CENTER);
+        totalIconLbl.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 40));
+        totalIconLbl.setForeground(new Color(255, 215, 0));
+        totalIconLbl.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JLabel totalLabel = new JLabel("Total Dibayar", SwingConstants.CENTER);
+        totalLabel.setForeground(new Color(170, 170, 170));
+        totalLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        totalLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JLabel totalValue = new JLabel(formatRp(finalTotal), SwingConstants.CENTER);
+        totalValue.setForeground(new Color(255, 215, 0));
+        totalValue.setFont(new Font("Segoe UI", Font.BOLD, 32));
+        totalValue.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        paymentCard.add(totalIconLbl);
+        paymentCard.add(Box.createVerticalStrut(14));
+        paymentCard.add(totalLabel);
+        paymentCard.add(Box.createVerticalStrut(6));
+        paymentCard.add(totalValue);
+
+        JPanel leftGap = new JPanel();
+        leftGap.setOpaque(false);
+        leftGap.setPreferredSize(new Dimension(100, 0));
+        contentRow.add(leftGap, BorderLayout.WEST);
+        contentRow.add(paymentCard, BorderLayout.CENTER);
+
+        BufferedImage qr = QRCodeGenerator.generateQR(
+                "CineTix\nPayment: " + selectedMethod + "\nTotal: " + formatRp(finalTotal));
+        if (qr != null) {
+            JPanel qrWrapper = new JPanel();
+            qrWrapper.setLayout(new BoxLayout(qrWrapper, BoxLayout.Y_AXIS));
+            qrWrapper.setOpaque(false);
+            qrWrapper.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(new Color(80, 80, 80), 1),
+                    new EmptyBorder(20, 20, 20, 20)));
+            qrWrapper.setPreferredSize(new Dimension(280, 340));
+
+            JLabel qrLabel = new JLabel(new ImageIcon(qr));
+            qrLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+            qrLabel.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200), 1));
+            qrLabel.setOpaque(true);
+            qrLabel.setBackground(Color.WHITE);
+
+            JLabel qrInstrText = new JLabel("<html><center>Tunjukkan QR ini ke kasir untuk<br>ditukar dengan tiket fisik.</center></html>", SwingConstants.CENTER);
+            qrInstrText.setForeground(new Color(190, 190, 190));
+            qrInstrText.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+            qrInstrText.setAlignmentX(Component.CENTER_ALIGNMENT);
+            qrInstrText.setBorder(new EmptyBorder(16, 0, 0, 0));
+
+            JLabel qrFooterText = new JLabel("Pindai di Kasir.", SwingConstants.CENTER);
+            qrFooterText.setForeground(new Color(180, 180, 180));
+            qrFooterText.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+            qrFooterText.setAlignmentX(Component.CENTER_ALIGNMENT);
+            qrFooterText.setBorder(new EmptyBorder(8, 0, 0, 0));
+
+            qrWrapper.add(qrLabel);
+            qrWrapper.add(qrInstrText);
+            qrWrapper.add(qrFooterText);
+
+            contentRow.add(qrWrapper, BorderLayout.EAST);
+        }
+
+        centre.add(contentRow);
+        centre.add(Box.createVerticalStrut(34));
 
         JButton btnHome = new JButton("Kembali ke Beranda");
-        btnHome.setBackground(new Color(35, 45, 130));
-        btnHome.setForeground(new Color(255, 200, 0));
-        btnHome.setFont(new Font("Krona One", Font.BOLD, 13));
+        btnHome.setBackground(new Color(30, 60, 140));
+        btnHome.setForeground(new Color(255, 220, 70));
+        btnHome.setFont(new Font("Segoe UI", Font.BOLD, 14));
         btnHome.setFocusPainted(false);
         btnHome.setAlignmentX(Component.CENTER_ALIGNMENT);
-        btnHome.setMaximumSize(new Dimension(260, 42));
-        btnHome.setBorder(BorderFactory.createLineBorder(new Color(210, 165, 0), 2));
+        btnHome.setMaximumSize(new Dimension(260, 44));
+        btnHome.setBorder(BorderFactory.createLineBorder(new Color(120, 160, 255), 1));
         btnHome.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btnHome.addActionListener(e -> {
             frame.dispose();
             new UserDashboard(userId).setVisible(true);
         });
 
-        centre.add(iconLbl);
-        centre.add(Box.createVerticalStrut(10));
-        centre.add(headLbl);
-        centre.add(Box.createVerticalStrut(6));
-        centre.add(subLbl);
-        centre.add(Box.createVerticalStrut(24));
-
-        JPanel contentRow = new JPanel(new BorderLayout(20, 0));
-        contentRow.setOpaque(false);
-
-        detailCard.setMaximumSize(new Dimension(420, 140));
-        contentRow.add(detailCard, BorderLayout.CENTER);
-
-        BufferedImage qr = QRCodeGenerator.generateQR(
-                "CineTix\nPayment: " + selectedMethod + "\nTotal: " + formatRp(finalTotal));
-        if (qr != null) {
-            JLabel qrLabel = new JLabel(new ImageIcon(qr));
-            qrLabel.setHorizontalAlignment(SwingConstants.CENTER);
-            qrLabel.setBorder(new EmptyBorder(10, 10, 10, 10));
-
-            JPanel qrWrapper = new JPanel(new BorderLayout());
-            qrWrapper.setOpaque(false);
-            qrWrapper.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(new Color(60, 60, 60)),
-                    new EmptyBorder(12, 12, 12, 12)));
-            qrWrapper.add(qrLabel, BorderLayout.CENTER);
-            qrWrapper.add(new JLabel("Tunjukkan QR ini ke kasir", SwingConstants.CENTER), BorderLayout.SOUTH);
-
-            contentRow.add(qrWrapper, BorderLayout.EAST);
-        }
-
-        centre.add(contentRow);
-        centre.add(Box.createVerticalStrut(28));
         centre.add(btnHome);
-
         root.add(centre, BorderLayout.CENTER);
-
-        JPanel botStripe = new JPanel();
-        botStripe.setBackground(new Color(30, 120, 60));
-        botStripe.setPreferredSize(new Dimension(0, 8));
-        root.add(botStripe, BorderLayout.SOUTH);
 
         frame.setVisible(true);
     }
 
-    private JLabel cardLabel(String text, Color color) {
-        JLabel lbl = new JLabel(text, SwingConstants.CENTER);
-        lbl.setForeground(color);
-        lbl.setFont(new Font("Krona One", Font.BOLD, 13));
-        return lbl;
+    private ImageIcon loadPaymentIcon(String methodType, int maxWidth, int maxHeight) {
+        String iconPath;
+        switch (methodType) {
+            case "ewallet":
+                iconPath = "/assets/dana.png";
+                break;
+            case "card":
+                iconPath = "/assets/visa_mastercard.png";
+                break;
+            case "bank":
+                iconPath = "/assets/bank.png";
+                break;
+            default:
+                return null;
+        }
+        return loadIcon(iconPath, maxWidth, maxHeight);
     }
 
     private void saveTransactions(int userId, String filmTitle, String studio, String jamTayang,

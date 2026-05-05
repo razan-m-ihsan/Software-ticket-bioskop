@@ -192,9 +192,15 @@ public class UserDashboard extends JFrame {
         header.setBackground(new Color(30, 30, 30));
         header.setBorder(new EmptyBorder(12, 20, 12, 20));
 
-        JLabel lblTitle = new JLabel("CineTix", SwingConstants.CENTER);
-        lblTitle.setForeground(Color.WHITE);
-        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 26));
+        JLabel lblTitle = new JLabel("", SwingConstants.CENTER);
+        ImageIcon logoIcon = loadPosterIcon("/assets/logo.png", 200, 45);
+        if (logoIcon != null) {
+            lblTitle.setIcon(logoIcon);
+        } else {
+            lblTitle.setText("CineTix");
+            lblTitle.setForeground(Color.WHITE);
+            lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 26));
+        }
 
         JLabel lblSub = new JLabel("Pilih Cinema", SwingConstants.CENTER);
         lblSub.setForeground(new Color(180, 180, 180));
@@ -1312,35 +1318,52 @@ public class UserDashboard extends JFrame {
         zoomDialog.setVisible(true);
     }
 
-    private ImageIcon loadPosterIcon(String path, int width, int height) {
+    private ImageIcon loadPosterIcon(String path, int maxWidth, int maxHeight) {
         if (path == null || path.isEmpty()) return null;
         try {
+            Image image = null;
             if (path.startsWith("http://") || path.startsWith("https://")) {
                 ImageIcon ic = new ImageIcon(new URL(path));
-                return new ImageIcon(ic.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH));
+                image = ic.getImage();
+            } else {
+                String normalized = path.startsWith("/") ? path.substring(1) : path;
+                URL resource = getClass().getResource("/" + normalized);
+                if (resource != null) {
+                    ImageIcon ic = new ImageIcon(resource);
+                    image = ic.getImage();
+                } else {
+                    File file = new File(path);
+                    if (!file.exists()) {
+                        String relative = normalized.startsWith("assets/") ? normalized.substring(7) : normalized;
+                        file = new File("src/assets", relative);
+                    }
+                    if (file.exists()) {
+                        image = ImageIO.read(file);
+                    }
+                }
             }
 
-            String normalized = path.startsWith("/") ? path.substring(1) : path;
-            URL resource = getClass().getResource("/" + normalized);
-            if (resource != null) {
-                ImageIcon ic = new ImageIcon(resource);
-                return new ImageIcon(ic.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH));
-            }
-
-            File file = new File(path);
-            if (!file.exists()) {
-                String relative = normalized.startsWith("assets/") ? normalized.substring(7) : normalized;
-                file = new File("src/assets", relative);
-            }
-
-            if (file.exists()) {
-                Image image = ImageIO.read(file);
-                return new ImageIcon(image.getScaledInstance(width, height, Image.SCALE_SMOOTH));
+            if (image != null) {
+                Image scaled = getScaledImage(image, maxWidth, maxHeight);
+                return new ImageIcon(scaled);
             }
         } catch (Exception ex) {
             // ignore and return no icon
         }
         return null;
+    }
+
+    private Image getScaledImage(Image image, int maxWidth, int maxHeight) {
+        int srcWidth = image.getWidth(null);
+        int srcHeight = image.getHeight(null);
+        if (srcWidth <= 0 || srcHeight <= 0) {
+            return image.getScaledInstance(maxWidth, maxHeight, Image.SCALE_SMOOTH);
+        }
+
+        double scale = Math.min((double) maxWidth / srcWidth, (double) maxHeight / srcHeight);
+        int width = Math.max(1, (int) (srcWidth * scale));
+        int height = Math.max(1, (int) (srcHeight * scale));
+        return image.getScaledInstance(width, height, Image.SCALE_SMOOTH);
     }
 
     private String getLocalPosterPathForTitle(String title) {

@@ -294,8 +294,8 @@ public class FoodMenuPanel extends JPanel {
         lblImage.setVerticalAlignment(SwingConstants.CENTER);
         lblImage.setPreferredSize(new Dimension(320, 320));
         lblImage.setOpaque(true);
-        lblImage.setBackground(new Color(30, 30, 30));
-        lblImage.setBorder(BorderFactory.createLineBorder(new Color(70, 70, 70), 1));
+        lblImage.setBackground(BG);
+        lblImage.setBorder(null);
 
         ImageIcon icon = loadFoodImage(item.imagePath, 320, 320);
         if (icon != null) {
@@ -463,7 +463,7 @@ public class FoodMenuPanel extends JPanel {
             File imageFile = new File(imagePath);
             if (imageFile.exists()) {
                 BufferedImage img = ImageIO.read(imageFile);
-                Image scaledImg = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+                Image scaledImg = getScaledImage(img, width, height);
                 return new ImageIcon(scaledImg);
             }
 
@@ -471,7 +471,7 @@ public class FoodMenuPanel extends JPanel {
             URL resourceUrl = getClass().getResource("/" + imagePath);
             if (resourceUrl != null) {
                 BufferedImage img = ImageIO.read(resourceUrl);
-                Image scaledImg = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+                Image scaledImg = getScaledImage(img, width, height);
                 return new ImageIcon(scaledImg);
             }
 
@@ -479,7 +479,7 @@ public class FoodMenuPanel extends JPanel {
             File relativeFile = new File("src/" + imagePath);
             if (relativeFile.exists()) {
                 BufferedImage img = ImageIO.read(relativeFile);
-                Image scaledImg = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+                Image scaledImg = getScaledImage(img, width, height);
                 return new ImageIcon(scaledImg);
             }
 
@@ -488,5 +488,18 @@ public class FoodMenuPanel extends JPanel {
             System.err.println("Failed to load image: " + imagePath);
         }
         return null;
+    }
+
+    private Image getScaledImage(BufferedImage src, int maxWidth, int maxHeight) {
+        int srcWidth = src.getWidth();
+        int srcHeight = src.getHeight();
+        if (srcWidth <= 0 || srcHeight <= 0) {
+            return src.getScaledInstance(maxWidth, maxHeight, Image.SCALE_SMOOTH);
+        }
+
+        double scale = Math.min((double) maxWidth / srcWidth, (double) maxHeight / srcHeight);
+        int width = Math.max(1, (int) (srcWidth * scale));
+        int height = Math.max(1, (int) (srcHeight * scale));
+        return src.getScaledInstance(width, height, Image.SCALE_SMOOTH);
     }
 }

@@ -33,7 +33,7 @@ public class PromoPage extends JDialog {
         mainPanel.setBackground(new Color(40, 40, 40));
 
         // Title
-        JLabel title = new JLabel("🎟 Promo Tersedia", SwingConstants.CENTER);
+        JLabel title = new JLabel("Promo Tersedia", SwingConstants.CENTER);
         title.setForeground(Color.WHITE);
         title.setFont(new Font("Segoe UI", Font.BOLD, 18));
         mainPanel.add(title, BorderLayout.NORTH);
