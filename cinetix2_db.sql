@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 04, 2026 at 01:30 PM
+-- Generation Time: May 05, 2026 at 03:58 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -72,7 +72,8 @@ CREATE TABLE `promos` (
 
 INSERT INTO `promos` (`id`, `kode_promo`, `deskripsi`, `diskon_persen`, `diskon_rupiah`, `tanggal_mulai`, `tanggal_akhir`, `aktif`) VALUES
 (2, 'HEMAT50K', 'Hemat Rp 50.000 ', 0, 50000, '2026-04-01', '2026-04-30', 0),
-(3, 'PromoOpening', 'Promo Opening Cinematix', 20, 0, '2026-04-21', '2026-05-21', 1);
+(3, 'PromoOpening', 'Promo Opening Cinematix', 20, 0, '2026-04-21', '2026-05-21', 1),
+(5, 'HEMAT100K', 'Promo Karena Owner Happy', 0, 50000, '2026-04-21', '2026-07-21', 1);
 
 -- --------------------------------------------------------
 
@@ -101,7 +102,8 @@ INSERT INTO `schedules` (`id`, `movie_id`, `studio_id`, `tanggal_tayang`, `jam_t
 (5, 2, 1, '2026-05-01', '12:00:00', 75000.00),
 (6, 8, 4, '2026-05-04', '13:00:00', 150000.00),
 (7, 7, 4, '2026-05-04', '13:00:00', 150000.00),
-(8, 7, 2, '2026-05-04', '18:00:00', 85000.00);
+(8, 7, 2, '2026-05-04', '18:00:00', 85000.00),
+(9, 2, 4, '2026-05-05', '18:00:00', 150000.00);
 
 -- --------------------------------------------------------
 
@@ -195,7 +197,8 @@ INSERT INTO `transactions` (`id`, `user_id`, `schedule_id`, `nomor_kursi`, `tota
 (46, 2, 7, 'F8', 150000.00, 'E-Wallet', 'Success', '2026-05-04 04:08:25'),
 (47, 2, 7, 'D8', 150000.00, 'E-Wallet', 'Success', '2026-05-04 04:08:25'),
 (48, 4, 8, 'B8', 85000.00, 'E-Wallet', 'Success', '2026-05-04 04:27:37'),
-(49, 4, 8, 'D9', 85000.00, 'E-Wallet', 'Success', '2026-05-04 04:27:37');
+(49, 4, 8, 'D9', 85000.00, 'E-Wallet', 'Success', '2026-05-04 04:27:37'),
+(50, 4, 9, 'H9', 150000.00, 'Kartu debit/Credit', 'Success', '2026-05-05 11:41:17');
 
 -- --------------------------------------------------------
 
@@ -281,13 +284,13 @@ ALTER TABLE `movies`
 -- AUTO_INCREMENT for table `promos`
 --
 ALTER TABLE `promos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `schedules`
 --
 ALTER TABLE `schedules`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `studios`
@@ -299,7 +302,7 @@ ALTER TABLE `studios`
 -- AUTO_INCREMENT for table `transactions`
 --
 ALTER TABLE `transactions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
 
 --
 -- AUTO_INCREMENT for table `users`
