@@ -256,19 +256,18 @@ public class TransactionHistoryForm extends JFrame {
         infoPanel.add(createInfoRow("Metode", metode));
         infoPanel.add(createInfoRow("Total", formatRp(total)));
         infoPanel.add(createInfoRow("Status", statusLabel(status)));
-        details.add(infoPanel, BorderLayout.CENTER);
-
-        JPanel spacer = new JPanel();
-        spacer.setOpaque(false);
-        spacer.setPreferredSize(new Dimension(0, 24));
-        details.add(spacer);
+        details.add(infoPanel, BorderLayout.NORTH);
 
         JLabel note = new JLabel("<html>Terima kasih telah menggunakan CineTix.<br>Enjoy your movie!</html>");
         note.setForeground(Color.WHITE);
         note.setFont(new Font("Segoe UI", Font.PLAIN, 16));
-        note.setBorder(new EmptyBorder(18, 0, 0, 0));
-        note.setMaximumSize(new Dimension(320, Integer.MAX_VALUE));
-        details.add(note);
+        note.setBorder(new EmptyBorder(26, 0, 0, 0));
+        note.setHorizontalAlignment(SwingConstants.LEFT);
+
+        JPanel noteWrapper = new JPanel(new BorderLayout());
+        noteWrapper.setOpaque(false);
+        noteWrapper.add(note, BorderLayout.NORTH);
+        details.add(noteWrapper, BorderLayout.SOUTH);
 
         card.add(details, BorderLayout.CENTER);
 
