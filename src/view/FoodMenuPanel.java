@@ -1,18 +1,24 @@
 package view;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.border.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.net.URL;
 import java.util.*;
-import java.util.List;
 
 public class FoodMenuPanel extends JPanel {
 
     // ── Callback ───────────────────────────────────────────────────────────────
     public interface FoodCallback {
         /** Called whenever any item quantity changes. */
-        void onOrderChanged(List<FoodItem> orderedItems, long foodTotal);
+        void onOrderChanged(java.util.List<FoodItem> orderedItems, long foodTotal);
     }
 
     // ── Data model ─────────────────────────────────────────────────────────────
@@ -20,26 +26,26 @@ public class FoodMenuPanel extends JPanel {
         public final String category;
         public final String name;
         public final long   price;
-        public final String emoji;   // large emoji used as "image"
+        public final String imagePath;   // path to image file in assets folder
         int quantity = 0;
 
-        FoodItem(String cat, String name, long price, String emoji) {
-            this.category = cat; this.name = name; this.price = price; this.emoji = emoji;
+        FoodItem(String cat, String name, long price, String imagePath) {
+            this.category = cat; this.name = name; this.price = price; this.imagePath = imagePath;
         }
         public String getDisplayName() { return name; }
     }
 
     // ── Master item list ───────────────────────────────────────────────────────
-    private static final List<FoodItem> ALL_ITEMS = new ArrayList<>();
+    private static final java.util.List<FoodItem> ALL_ITEMS = new ArrayList<>();
     static {
-        ALL_ITEMS.add(new FoodItem("POPCORN",    "Popcorn Caramel\nLarge",  35_000, "🍿"));
-        ALL_ITEMS.add(new FoodItem("POPCORN",    "Popcorn Regular",         25_000, "🍿"));
-        ALL_ITEMS.add(new FoodItem("POPCORN",    "Popcorn Butter",          28_000, "🍿"));
-        ALL_ITEMS.add(new FoodItem("MINUMAN",    "Soda Jumbo",              20_000, "🥤"));
-        ALL_ITEMS.add(new FoodItem("MINUMAN",    "Aqua Botol",              10_000, "💧"));
-        ALL_ITEMS.add(new FoodItem("MINUMAN",    "Jus Jeruk",               18_000, "🍊"));
-        ALL_ITEMS.add(new FoodItem("PAKET HEMAT","Paket Couple",            95_000, "🍿🥤"));
-        ALL_ITEMS.add(new FoodItem("PAKET HEMAT","Paket Family",           175_000, "🍿🥤🥤"));
+        ALL_ITEMS.add(new FoodItem("POPCORN",    "Popcorn Caramel\nLarge",  35_000, "assets/popcorn_caramel.png"));
+        ALL_ITEMS.add(new FoodItem("POPCORN",    "Popcorn Regular",         25_000, "assets/popcorn_regular.png"));
+        ALL_ITEMS.add(new FoodItem("POPCORN",    "Popcorn Butter",          28_000, "assets/popcorn_butter.png"));
+        ALL_ITEMS.add(new FoodItem("MINUMAN",    "Soda Jumbo",              20_000, "assets/soda_jumbo.png"));
+        ALL_ITEMS.add(new FoodItem("MINUMAN",    "Air Mineral Botol",              10_000, "assets/aqua_botol.png"));
+        ALL_ITEMS.add(new FoodItem("MINUMAN",    "Jus Jeruk",               18_000, "assets/jus_jeruk.png"));
+        ALL_ITEMS.add(new FoodItem("PAKET HEMAT","Paket Couple",            95_000, "assets/paket_couple.png"));
+        ALL_ITEMS.add(new FoodItem("PAKET HEMAT","Paket Family",           175_000, "assets/paket_family.jpg"));
     }
 
     // ── State ──────────────────────────────────────────────────────────────────
@@ -131,7 +137,7 @@ public class FoodMenuPanel extends JPanel {
     private void refreshGrid() {
         itemGridPanel.removeAll();
 
-        List<FoodItem> visible = new ArrayList<>();
+        java.util.List<FoodItem> visible = new ArrayList<>();
         for (FoodItem item : ALL_ITEMS) {
             if (activeCategory.equals("SEMUA") || item.category.equals(activeCategory)) {
                 visible.add(item);
@@ -167,11 +173,24 @@ public class FoodMenuPanel extends JPanel {
         lblName.setFont(new Font("Segoe UI", Font.BOLD, 12));
         card.add(lblName, BorderLayout.NORTH);
 
-        // ── Emoji "image" ─────────────────────────────────────
-        JLabel lblEmoji = new JLabel(item.emoji, SwingConstants.CENTER);
-        lblEmoji.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 48));
-        lblEmoji.setPreferredSize(new Dimension(0, 80));
-        card.add(lblEmoji, BorderLayout.CENTER);
+        // ── Image ─────────────────────────────────────
+        JLabel lblImage = new JLabel();
+        lblImage.setHorizontalAlignment(SwingConstants.CENTER);
+        lblImage.setPreferredSize(new Dimension(0, 80));
+        lblImage.setBorder(BorderFactory.createLineBorder(new Color(100, 100, 100), 1));
+
+        // Load image from assets folder
+        ImageIcon imageIcon = loadFoodImage(item.imagePath, 80, 80);
+        if (imageIcon != null) {
+            lblImage.setIcon(imageIcon);
+        } else {
+            // Fallback to text if image not found
+            lblImage.setText("No Image");
+            lblImage.setForeground(Color.WHITE);
+            lblImage.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        }
+
+        card.add(lblImage, BorderLayout.CENTER);
 
         // ── Price + qty control ───────────────────────────────
         JPanel bottom = new JPanel(new BorderLayout(0, 4));
@@ -244,7 +263,7 @@ public class FoodMenuPanel extends JPanel {
     // ── Callback fire ──────────────────────────────────────────────────────────
     private void fireCallback() {
         if (callback == null) return;
-        List<FoodItem> ordered = new ArrayList<>();
+        java.util.List<FoodItem> ordered = new ArrayList<>();
         long total = 0;
         for (FoodItem item : ALL_ITEMS) {
             int q = quantities.getOrDefault(item.name, 0);
@@ -291,5 +310,38 @@ public class FoodMenuPanel extends JPanel {
     // ── Helpers ────────────────────────────────────────────────────────────────
     private String formatRp(long amount) {
         return "Rp " + String.format("%,d", amount).replace(',', '.');
+    }
+
+    private ImageIcon loadFoodImage(String imagePath, int width, int height) {
+        try {
+            // Try to load from assets folder first
+            File imageFile = new File(imagePath);
+            if (imageFile.exists()) {
+                BufferedImage img = ImageIO.read(imageFile);
+                Image scaledImg = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+                return new ImageIcon(scaledImg);
+            }
+
+            // Try to load as resource from classpath
+            URL resourceUrl = getClass().getResource("/" + imagePath);
+            if (resourceUrl != null) {
+                BufferedImage img = ImageIO.read(resourceUrl);
+                Image scaledImg = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+                return new ImageIcon(scaledImg);
+            }
+
+            // Try relative to src/assets
+            File relativeFile = new File("src/" + imagePath);
+            if (relativeFile.exists()) {
+                BufferedImage img = ImageIO.read(relativeFile);
+                Image scaledImg = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+                return new ImageIcon(scaledImg);
+            }
+
+        } catch (Exception e) {
+            // Image loading failed, will use fallback
+            System.err.println("Failed to load image: " + imagePath);
+        }
+        return null;
     }
 }
