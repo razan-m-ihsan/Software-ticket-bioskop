@@ -42,10 +42,10 @@ public class FoodMenuPanel extends JPanel {
         ALL_ITEMS.add(new FoodItem("POPCORN",    "Popcorn Regular",         25_000, "assets/popcorn_regular.png"));
         ALL_ITEMS.add(new FoodItem("POPCORN",    "Popcorn Butter",          28_000, "assets/popcorn_butter.png"));
         ALL_ITEMS.add(new FoodItem("MINUMAN",    "Soda Jumbo",              20_000, "assets/soda_jumbo.png"));
-        ALL_ITEMS.add(new FoodItem("MINUMAN",    "Air Mineral Botol",              10_000, "assets/aqua_botol.png"));
+        ALL_ITEMS.add(new FoodItem("MINUMAN",    "Air Mineral Botol",       10_000, "assets/aqua_botol.png"));
         ALL_ITEMS.add(new FoodItem("MINUMAN",    "Jus Jeruk",               18_000, "assets/jus_jeruk.png"));
         ALL_ITEMS.add(new FoodItem("PAKET HEMAT","Paket Couple",            95_000, "assets/paket_couple.png"));
-        ALL_ITEMS.add(new FoodItem("PAKET HEMAT","Paket Family",           175_000, "assets/paket_family.jpg"));
+        ALL_ITEMS.add(new FoodItem("PAKET HEMAT","Paket Family",            175_000, "assets/paket_family.jpg"));
     }
 
     // ── State ──────────────────────────────────────────────────────────────────
