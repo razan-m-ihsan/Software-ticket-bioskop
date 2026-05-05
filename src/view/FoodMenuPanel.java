@@ -75,9 +75,7 @@ public class FoodMenuPanel extends JPanel {
 
         setLayout(new BorderLayout(0, 8));
         setBackground(BG);
-        setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(CARD_BD, 2),
-                new EmptyBorder(10, 10, 10, 10)));
+        setBorder(new EmptyBorder(10, 10, 10, 10));
 
         add(buildTabRow(),   BorderLayout.NORTH);
 
@@ -161,9 +159,7 @@ public class FoodMenuPanel extends JPanel {
     private JPanel buildItemCard(FoodItem item) {
         JPanel card = new JPanel(new BorderLayout(0, 6));
         card.setBackground(CARD_BG);
-        card.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(CARD_BD, 2),
-                new EmptyBorder(10, 8, 8, 8)));
+        card.setBorder(new EmptyBorder(10, 8, 8, 8));
 
         // ── Item name ─────────────────────────────────────────
         String nameHtml = "<html><center><b>"
@@ -177,7 +173,8 @@ public class FoodMenuPanel extends JPanel {
         JLabel lblImage = new JLabel();
         lblImage.setHorizontalAlignment(SwingConstants.CENTER);
         lblImage.setPreferredSize(new Dimension(0, 80));
-        lblImage.setBorder(BorderFactory.createLineBorder(new Color(100, 100, 100), 1));
+        lblImage.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        lblImage.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         // Load image from assets folder
         ImageIcon imageIcon = loadFoodImage(item.imagePath, 80, 80);
@@ -189,6 +186,26 @@ public class FoodMenuPanel extends JPanel {
             lblImage.setForeground(Color.WHITE);
             lblImage.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         }
+
+        MouseAdapter previewMouseListener = new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                showItemDetailDialog(item);
+            }
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                card.setBackground(CARD_BG.brighter());
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                card.setBackground(CARD_BG);
+            }
+        };
+
+        lblImage.addMouseListener(previewMouseListener);
+        lblName.addMouseListener(previewMouseListener);
+        card.addMouseListener(previewMouseListener);
+        card.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         card.add(lblImage, BorderLayout.CENTER);
 
@@ -258,6 +275,134 @@ public class FoodMenuPanel extends JPanel {
             public void mouseExited(MouseEvent e)  { btn.setBackground(QTY_BTN_BG); }
         });
         return btn;
+    }
+
+    private void showItemDetailDialog(FoodItem item) {
+        Window owner = SwingUtilities.getWindowAncestor(this);
+        JDialog dialog;
+        if (owner instanceof Frame) {
+            dialog = new JDialog((Frame) owner, "Detail " + item.name, true);
+        } else if (owner instanceof Dialog) {
+            dialog = new JDialog((Dialog) owner, "Detail " + item.name, true);
+        } else {
+            dialog = new JDialog((Frame) null, "Detail " + item.name, true);
+        }
+        dialog.setResizable(false);
+
+        JLabel lblImage = new JLabel();
+        lblImage.setHorizontalAlignment(SwingConstants.CENTER);
+        lblImage.setVerticalAlignment(SwingConstants.CENTER);
+        lblImage.setPreferredSize(new Dimension(320, 320));
+        lblImage.setOpaque(true);
+        lblImage.setBackground(new Color(30, 30, 30));
+        lblImage.setBorder(BorderFactory.createLineBorder(new Color(70, 70, 70), 1));
+
+        ImageIcon icon = loadFoodImage(item.imagePath, 320, 320);
+        if (icon != null) {
+            lblImage.setIcon(icon);
+        } else {
+            lblImage.setText("No Image");
+            lblImage.setForeground(Color.WHITE);
+            lblImage.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        }
+
+        JLabel lblName = new JLabel("<html><div style='text-align:left;'><b>" + item.name.replace("\n", "<br>") + "</b></div></html>");
+        lblName.setForeground(Color.WHITE);
+        lblName.setFont(new Font("Segoe UI", Font.BOLD, 24));
+
+        JLabel lblCategoryTitle = new JLabel("Kategori:");
+        lblCategoryTitle.setForeground(new Color(200, 200, 200));
+        lblCategoryTitle.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+
+        JLabel lblCategory = new JLabel(item.category);
+        lblCategory.setForeground(new Color(255, 215, 0));
+        lblCategory.setFont(new Font("Segoe UI", Font.BOLD, 14));
+
+        JLabel lblPrice = new JLabel(formatRp(item.price));
+        lblPrice.setForeground(new Color(255, 215, 0));
+        lblPrice.setFont(new Font("Segoe UI", Font.BOLD, 22));
+
+        JTextArea txtDesc = new JTextArea(getItemDescription(item));
+        txtDesc.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        txtDesc.setForeground(Color.WHITE);
+        txtDesc.setOpaque(false);
+        txtDesc.setEditable(false);
+        txtDesc.setLineWrap(true);
+        txtDesc.setWrapStyleWord(true);
+        txtDesc.setBorder(null);
+
+        JButton btnClose = new JButton("Tutup");
+        btnClose.setBackground(new Color(160, 30, 30));
+        btnClose.setForeground(Color.WHITE);
+        btnClose.setFocusPainted(false);
+        btnClose.setBorderPainted(false);
+        btnClose.setPreferredSize(new Dimension(140, 40));
+        btnClose.addActionListener(e -> dialog.dispose());
+
+        JPanel imageHolder = new JPanel(new GridBagLayout());
+        imageHolder.setBackground(BG);
+        imageHolder.add(lblImage);
+
+        JPanel infoPanel = new JPanel(new GridBagLayout());
+        infoPanel.setBackground(BG);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.weightx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.NORTHWEST;
+        gbc.insets = new Insets(0, 0, 12, 0);
+
+        gbc.gridy = 0;
+        infoPanel.add(lblName, gbc);
+
+        gbc.gridy = 1;
+        infoPanel.add(lblCategoryTitle, gbc);
+
+        gbc.gridy = 2;
+        infoPanel.add(lblCategory, gbc);
+
+        gbc.gridy = 3;
+        infoPanel.add(lblPrice, gbc);
+
+        gbc.gridy = 4;
+        gbc.insets = new Insets(12, 0, 12, 0);
+        infoPanel.add(txtDesc, gbc);
+
+        JPanel center = new JPanel(new BorderLayout());
+        center.setBackground(BG);
+        center.add(infoPanel, BorderLayout.NORTH);
+
+        JPanel content = new JPanel(new BorderLayout(24, 24));
+        content.setBackground(BG);
+        content.setBorder(new EmptyBorder(20, 20, 20, 20));
+        content.add(imageHolder, BorderLayout.WEST);
+        content.add(center, BorderLayout.CENTER);
+
+        JPanel south = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        south.setBackground(BG);
+        south.add(btnClose);
+
+        dialog.add(content, BorderLayout.CENTER);
+        dialog.add(south, BorderLayout.SOUTH);
+
+        dialog.setPreferredSize(new Dimension(720, 520));
+        dialog.pack();
+        dialog.setSize(720, 520);
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
+    }
+
+    private String getItemDescription(FoodItem item) {
+        switch (item.category) {
+            case "POPCORN":
+                return "Popcorn hangat dan gurih, pilihan cocok untuk menonton film. Nikmati rasa karamel, mentega, atau reguler sesuai selera.";
+            case "MINUMAN":
+                return "Minuman segar untuk menemani pengalaman menonton. Pilih soda, air mineral, atau jus jeruk untuk melengkapi pesanan Anda.";
+            case "PAKET HEMAT":
+                return "Paket hemat berisi kombinasi makanan dan minuman untuk teman atau keluarga. Lebih ekonomis dan praktis untuk dinikmati bersama.";
+            default:
+                return "Detail produk ini tersedia di sini. Klik tutup untuk kembali ke daftar menu.";
+        }
     }
 
     // ── Callback fire ──────────────────────────────────────────────────────────
