@@ -50,8 +50,9 @@ public class MovieForm extends JFrame {
         panel.add(headerPanel, BorderLayout.NORTH);
 
         // ===== FORM =====
-        JPanel formPanel = new JPanel(new GridLayout(8, 2, 10, 10));
+        JPanel formPanel = new JPanel(new GridLayout(7, 2, 10, 10));
         formPanel.setBorder(BorderFactory.createTitledBorder("Input Film"));
+        formPanel.setBackground(new Color(245, 245, 245));
 
         txtJudul = new JTextField();
         txtSinopsis = new JTextArea(3, 20);
@@ -82,11 +83,25 @@ public class MovieForm extends JFrame {
 
         formPanel.add(new JLabel("Poster"));
         JPanel posterPanel = new JPanel(new BorderLayout(6, 0));
+        posterPanel.setBackground(new Color(245, 245, 245));
         posterPanel.add(txtPoster, BorderLayout.CENTER);
         posterPanel.add(btnBrowsePoster, BorderLayout.EAST);
         formPanel.add(posterPanel);
 
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        btnTambah.setBackground(new Color(52, 152, 219));
+        btnTambah.setForeground(Color.WHITE);
+        btnTambah.setFocusPainted(false);
+
+        btnUpdate.setBackground(new Color(46, 204, 113));
+        btnUpdate.setForeground(Color.WHITE);
+        btnUpdate.setFocusPainted(false);
+
+        btnHapus.setBackground(new Color(231, 76, 60));
+        btnHapus.setForeground(Color.WHITE);
+        btnHapus.setFocusPainted(false);
+
+        JPanel buttonPanel = new JPanel(new GridLayout(1, 3, 10, 0));
+        buttonPanel.setBackground(new Color(245, 245, 245));
         buttonPanel.add(btnTambah);
         buttonPanel.add(btnUpdate);
         buttonPanel.add(btnHapus);
@@ -121,8 +136,9 @@ public class MovieForm extends JFrame {
         table.setRowHeight(25);
         table.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
+        table.getTableHeader().setBackground(new Color(52, 73, 94));
+        table.getTableHeader().setForeground(Color.WHITE);
 
-        // ← CHANGED: wrap form+table in contentPanel so header stays at top
         JPanel contentPanel = new JPanel(new BorderLayout());
         contentPanel.setBackground(new Color(245, 245, 245));
         contentPanel.add(formPanel,  BorderLayout.NORTH);

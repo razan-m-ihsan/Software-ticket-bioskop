@@ -45,10 +45,11 @@ public class RegisterForm extends JFrame {
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
 
         // ===== TITLE =====
-        JLabel title = new JLabel("🎬 CineTix");
+        JLabel title = new JLabel();
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
         title.setForeground(Color.WHITE);
         title.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        setLogo(title, "src/assets/logo.png", 220, 80);
 
         JLabel subtitle = new JLabel("Create your account");
         subtitle.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -138,6 +139,36 @@ public class RegisterForm extends JFrame {
                 }
             }
         });
+    }
+
+    private void setLogo(JLabel label, String path, int maxWidth, int maxHeight) {
+        ImageIcon logoIcon = null;
+        java.net.URL logoUrl = getClass().getResource("/assets/logo.png");
+        if (logoUrl != null) {
+            logoIcon = new ImageIcon(logoUrl);
+        } else {
+            String[] tryPaths = {path, "assets/logo.png", "bin/assets/logo.png"};
+            for (String p : tryPaths) {
+                if (new java.io.File(p).exists()) {
+                    logoIcon = new ImageIcon(p);
+                    break;
+                }
+            }
+        }
+
+        if (logoIcon != null && logoIcon.getIconWidth() > 0 && logoIcon.getIconHeight() > 0) {
+            int originalWidth = logoIcon.getIconWidth();
+            int originalHeight = logoIcon.getIconHeight();
+            double scale = Math.min((double) maxWidth / originalWidth, (double) maxHeight / originalHeight);
+            int targetWidth = (int) Math.round(originalWidth * scale);
+            int targetHeight = (int) Math.round(originalHeight * scale);
+            Image scaled = logoIcon.getImage().getScaledInstance(targetWidth, targetHeight, Image.SCALE_SMOOTH);
+            label.setIcon(new ImageIcon(scaled));
+            label.setText("");
+            label.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+        } else {
+            label.setText("CineTix");
+        }
     }
 
     // ===== REGISTER LOGIC =====
